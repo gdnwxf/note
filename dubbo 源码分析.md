@@ -1,5 +1,7 @@
 ## dubbo 源码分析
 
+* consumer 端调用
+
 application.getBean(interface)
 
 com.alibaba.dubbo.config.spring.ReferenceBean#getObject
@@ -9,6 +11,28 @@ com.alibaba.dubbo.config.ReferenceConfig#get
 com.alibaba.dubbo.config.ReferenceConfig#init
 
 com.alibaba.dubbo.config.ReferenceConfig#createProxy
+
+Protocol.refer 
+
+ProtocolFilterWrapper.refer
+
+ProtocolListenerWrapper.refer ( RegistryProtocol.refer zk 实例化以及监听 )
+
+RegistryProtocol.refer (RegistryFactory.getRegistry)
+
+RegistryProtocol.doRefer
+
+RegistryDirectory init
+
+RegistryDirectory.subscrible (订阅注册中心日志 , registry.subscribe)
+
+Cluster.join —> 生成invoker  warpper invoker 到 ProviderConsumerRegTable
+
+返回到 createProxy
+
+Cluster.join staticDirectory (AvailableCluster  存放一个可以用的invoker )
+
+
 
 * ExtensionLoader 机制
 
@@ -42,7 +66,7 @@ private T createExtension(String name) {
         Set<Class<?>> wrapperClasses = cachedWrapperClasses;
         if (wrapperClasses != null && !wrapperClasses.isEmpty()) {
             for (Class<?> wrapperClass : wrapperClasses) {
-                instance = injectExtension((T) wrapperClass.getConstructor(type).newInstance(instance)); // 在此实现循环嵌套注入instance 
+                instance = injectExtension((T) wrapperClass.getConstructor(type).newInstance(instance)); // 在此实现循环嵌套注入instance 主要用在filter
             }
         }
         return instance; // 此时只需要最后一个instance既可以实现链式调用啦
