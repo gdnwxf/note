@@ -1,0 +1,32 @@
+disconf 客户端源码分析
+函数入口 
+--> first scan com.baidu.disconf.client.DisconfMgrBean (实现了 BeanDefinitionRegistryPostProcessor, PriorityOrdered, ApplicationContextAware) 
+	--> postProcessBeanFactory 
+	--> postProcessBeanDefinitionRegistry 这个是优先级最高的
+	--> new DisconfCenterHostFilesStore
+	--> DisconfMgr.getInstance().firstScan(配置的包路径)
+		--> ConfigMgr.init();
+			--> DisClientSysConfig.getInstance().loadConfig(null) 导入系统配置 这个[disconf_sys.properties]文件中的配置
+				--> DisconfAutowareConfig.autowareConfig(DisClientSysConfig.instance, filePathInternal);
+				--> DisconfAutowareConfig#autowareConfig(java.lang.Object, java.util.Properties) 给DisClientSysConfig 注入[disconf_sys.properties]的信息
+			--> DisClientConfig.getInstance().loadConfig(null)  导入用户配置
+				--> DisconfAutowareConfig.autowareConfig(INSTANCE, filePathInternal);  导入用户设置的 [disconf.properties, disconf.conf]的信息
+			--> Registry registry = RegistryFactory.getSpringRegistry(applicationContext); 从spring中查找bean
+			--> scanMgr = ScanFactory.getScanMgr(registry); 设置扫描器 [配置文件, 配置项, 非注解 托管的配置文件]
+			--> scanMgr.firstScan(scanPackageList) 第一次扫描并入库
+			--> disconfCoreMgr = DisconfCoreFactory.getDisconfCoreMgr(registry); 获取数据/注入/Watch 
+	--> registerAspect(registry) 
+		-->registry.registerBeanDefinition("disconfAspectJ", beanDefinition)  注册 DisconfAspectJ 切面
+
+
+
+--> second scan com.baidu.disconf.client.DisconfMgrBeanSecond 重复做一遍上述的内容
+	--> if(!isFirstInit) return 必须第一次做了之后才能做
+	--> scanMgr.secondScan(); --> com.baidu.disconf.client.scan.impl.ScanMgrImpl#secondScan
+	 	--> ScanDynamicStoreAdapter.scanUpdateCallbacks(scanModel, registry); 将回调函数实例化并写入仓库
+	 		--> ScanDynamicModel scanDynamicModel = analysis4DisconfUpdate(scanModel, registry);  等待第一次 disconfAspectJ 扫描出来
+	 		--> transformUpdateService(scanDynamicModel.getDisconfUpdateServiceInverseIndexMap()); 写入到仓库中
+	 			--> private Map<DisconfKey, List<IDisconfUpdate>> disconfUpdateServiceInverseIndexMap = new HashMap<DisconfKey, List<IDisconfUpdate>>();  //配置及影响的回调函数, Key为配置项KEY 或 配置文件
+	 		--> transformPipelineService(scanDynamicModel.getDisconfUpdatePipeline()); 写入到仓库中
+	 			--> ScanDynamicModel.disconfUpdatePipeline //通用型的配置更新接口。当配置更新 时，用户可以实现此接口，用以来实现回调函数.
+	 			--> ((DisconfCenterStore) getInstance()).setiDisconfUpdatePipeline(iDisconfUpdatePipeline);
