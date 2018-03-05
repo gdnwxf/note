@@ -1,0 +1,72 @@
+[04/03/18 09:07:52:052 CST] main-SendThread(10.1.24.101:2181) DEBUG ClientCnxn$SendThread.readResponse(ClientCnxn.java:756): Got ping response for sessionid: 0x1001b2f252e0051 after 6ms
+[04/03/18 09:07:55:055 CST] main-SendThread(10.1.24.101:2181) DEBUG ClientCnxn$SendThread.readResponse(ClientCnxn.java:756): Got ping response for sessionid: 0x1001b2f252e0051 after 143ms
+[04/03/18 09:07:57:057 CST] main-SendThread(10.1.24.101:2181) DEBUG ClientCnxn$SendThread.readResponse(ClientCnxn.java:780): Got notification sessionid:0x1001b2f252e0051
+[04/03/18 09:07:57:057 CST] main-SendThread(10.1.24.101:2181) DEBUG ClientCnxn$SendThread.readResponse(ClientCnxn.java:797): Got WatchedEvent state:SyncConnected type:NodeDataChanged path:/aganNode for sessionid 0x1001b2f252e0051
+[04/03/18 09:08:02:002 CST] main-SendThread(10.1.24.101:2181) DEBUG ClientCnxn$SendThread.readResponse(ClientCnxn.java:756): Got ping response for sessionid: 0x1001b2f252e0051 after 3355ms
+[04/03/18 09:08:05:005 CST] main-SendThread(10.1.24.101:2181) DEBUG ClientCnxn$SendThread.readResponse(ClientCnxn.java:756): Got ping response for sessionid: 0x1001b2f252e0051 after 97ms
+[04/03/18 09:08:06:006 CST] main-EventThread DEBUG ZkClient.process(ZkClient.java:351): Received event: WatchedEvent state:SyncConnected type:NodeDataChanged path:/aganNode
+[04/03/18 09:08:09:009 CST] main-SendThread(10.1.24.101:2181) DEBUG ClientCnxn$SendThread.readResponse(ClientCnxn.java:756): Got ping response for sessionid: 0x1001b2f252e0051 after 29ms
+[04/03/18 09:08:10:010 CST] main-EventThread DEBUG ZkEventThread.send(ZkEventThread.java:88): New event: ZkEvent[Data of /aganNode changed sent to com.soa.other.zk.SubscribeDataChanges$ZKDataListener@2b3f6f1d]
+[04/03/18 09:08:10:010 CST] ZkClient-EventThread-13-10.1.24.101:2181 DEBUG ZkEventThread.run(ZkEventThread.java:69): Delivering event #1 ZkEvent[Data of /aganNode changed sent to com.soa.other.zk.SubscribeDataChanges$ZKDataListener@2b3f6f1d]
+[04/03/18 09:08:29:029 CST] main-SendThread(10.1.24.101:2181) DEBUG ClientCnxn$SendThread.readResponse(ClientCnxn.java:836): Reading reply sessionid:0x1001b2f252e0051, packet:: clientPath:null serverPath:null finished:false header:: 2,3  replyHeader:: 2,1573,0  request:: '/aganNode,T  response:: s{1532,1572,1520167745857,1520168877236,9,0,0,0,30,0,1532} 
+[04/03/18 09:08:29:029 CST] main-SendThread(10.1.24.101:2181)  INFO ClientCnxn$SendThread.run(ClientCnxn.java:1183): Unable to read additional data from server sessionid 0x1001b2f252e0051, likely server has closed socket, closing socket connection and attempting reconnect
+[04/03/18 09:08:30:030 CST] main-EventThread DEBUG ZkClient.process(ZkClient.java:395): Leaving process event
+[04/03/18 09:08:32:032 CST] main-SendThread(10.1.24.101:2181)  INFO ClientCnxn$SendThread.startConnect(ClientCnxn.java:1058): Opening socket connection to server 10.1.24.101/10.1.24.101:2181
+[04/03/18 09:08:33:033 CST] main-SendThread(10.1.24.101:2181)  INFO ClientCnxn$SendThread.primeConnection(ClientCnxn.java:947): Socket connection established to 10.1.24.101/10.1.24.101:2181, initiating session
+[04/03/18 09:08:34:034 CST] main-SendThread(10.1.24.101:2181) DEBUG ClientCnxn$SendThread.primeConnection(ClientCnxn.java:996): Session establishment request sent on 10.1.24.101/10.1.24.101:2181
+[04/03/18 09:08:35:035 CST] main-SendThread(10.1.24.101:2181)  INFO ClientCnxn$SendThread.run(ClientCnxn.java:1179): Unable to reconnect to ZooKeeper service, session 0x1001b2f252e0051 has expired, closing socket connection
+[04/03/18 09:08:35:035 CST] main-EventThread DEBUG ZkClient.process(ZkClient.java:351): Received event: WatchedEvent state:Disconnected type:None path:null
+[04/03/18 09:08:37:037 CST] main-EventThread  INFO ZkClient.processStateChanged(ZkClient.java:449): zookeeper state changed (Disconnected)
+[04/03/18 09:08:37:037 CST] ZkClient-EventThread-13-10.1.24.101:2181 DEBUG ZkClient.waitForKeeperState(ZkClient.java:628): Waiting for keeper state SyncConnected
+[04/03/18 09:08:37:037 CST] main-EventThread DEBUG ZkEventThread.send(ZkEventThread.java:88): New event: ZkEvent[State changed to Disconnected sent to com.soa.other.zk.CreateSession$1@4901fdb6]
+[04/03/18 09:08:39:039 CST] main-EventThread DEBUG ZkClient.process(ZkClient.java:395): Leaving process event
+[04/03/18 09:08:44:044 CST] main-EventThread DEBUG ZkClient.process(ZkClient.java:351): Received event: WatchedEvent state:Expired type:None path:null
+[04/03/18 09:08:46:046 CST] main-EventThread  INFO ZkClient.processStateChanged(ZkClient.java:449): zookeeper state changed (Expired)
+[04/03/18 09:08:46:046 CST] main-EventThread DEBUG ZkEventThread.send(ZkEventThread.java:88): New event: ZkEvent[State changed to Expired sent to com.soa.other.zk.CreateSession$1@4901fdb6]
+[04/03/18 09:08:46:046 CST] main-EventThread DEBUG ZkConnection.close(ZkConnection.java:77): Closing ZooKeeper connected to 10.1.24.101:2181
+[04/03/18 09:08:46:046 CST] main-EventThread DEBUG ZooKeeper.close(ZooKeeper.java:527): Close called on already closed client
+[04/03/18 09:08:46:046 CST] main-EventThread DEBUG ZkConnection.connect(ZkConnection.java:63): Creating new ZookKeeper instance to connect to 10.1.24.101:2181.
+[04/03/18 09:08:46:046 CST] main-EventThread  INFO ZooKeeper.<init>(ZooKeeper.java:379): Initiating client connection, connectString=10.1.24.101:2181 sessionTimeout=10000 watcher=org.I0Itec.zkclient.ZkClient@2f686d1f
+[04/03/18 09:08:46:046 CST] main-SendThread()  INFO ClientCnxn$SendThread.startConnect(ClientCnxn.java:1058): Opening socket connection to server /10.1.24.101:2181
+[04/03/18 09:08:46:046 CST] main-EventThread DEBUG ZkEventThread.send(ZkEventThread.java:88): New event: ZkEvent[New session event sent to com.soa.other.zk.CreateSession$1@4901fdb6]
+[04/03/18 09:08:46:046 CST] main-SendThread(10.1.24.101:2181)  INFO ClientCnxn$SendThread.primeConnection(ClientCnxn.java:947): Socket connection established to 10.1.24.101/10.1.24.101:2181, initiating session
+[04/03/18 09:08:46:046 CST] main-SendThread(10.1.24.101:2181) DEBUG ClientCnxn$SendThread.primeConnection(ClientCnxn.java:996): Session establishment request sent on 10.1.24.101/10.1.24.101:2181
+[04/03/18 09:08:46:046 CST] main-SendThread(10.1.24.101:2181)  INFO ClientCnxn$SendThread.readConnectResult(ClientCnxn.java:736): Session establishment complete on server 10.1.24.101/10.1.24.101:2181, sessionid = 0x1001b2f252e0053, negotiated timeout = 10000
+[04/03/18 09:08:46:046 CST] main-EventThread DEBUG ZkClient.process(ZkClient.java:351): Received event: WatchedEvent state:SyncConnected type:None path:null
+[04/03/18 09:08:47:047 CST] main-EventThread DEBUG ZkEventThread.send(ZkEventThread.java:88): New event: ZkEvent[Data of /aganNode changed sent to com.soa.other.zk.SubscribeDataChanges$ZKDataListener@2b3f6f1d]
+[04/03/18 09:08:48:048 CST] main-EventThread  INFO ZkClient.processStateChanged(ZkClient.java:449): zookeeper state changed (SyncConnected)
+[04/03/18 09:08:48:048 CST] main-EventThread DEBUG ZkEventThread.send(ZkEventThread.java:88): New event: ZkEvent[State changed to SyncConnected sent to com.soa.other.zk.CreateSession$1@4901fdb6]
+[04/03/18 09:08:48:048 CST] main-EventThread DEBUG ZkClient.process(ZkClient.java:395): Leaving process event
+[04/03/18 09:08:48:048 CST] ZkClient-EventThread-13-10.1.24.101:2181 DEBUG ZkClient.waitForKeeperState(ZkClient.java:638): State is SyncConnected
+[04/03/18 09:08:48:048 CST] main-EventThread DEBUG ZkClient.process(ZkClient.java:395): Leaving process event
+[04/03/18 09:08:49:049 CST] main-SendThread(10.1.24.101:2181) DEBUG ClientCnxn$SendThread.readResponse(ClientCnxn.java:836): Reading reply sessionid:0x1001b2f252e0053, packet:: clientPath:null serverPath:null finished:false header:: 1,4  replyHeader:: 1,1575,0  request:: '/aganNode,T  response:: #ffffffacffffffed057401755736572205b69643d322c206e616d653d6167616e315d,s{1532,1572,1520167745857,1520168877236,9,0,0,0,30,0,1532} 
+订阅节点的数据内容的变化/aganNode:User [id=2, name=agan1]
+[04/03/18 09:08:52:052 CST] ZkClient-EventThread-13-10.1.24.101:2181 DEBUG ZkEventThread.run(ZkEventThread.java:79): Delivering event #1 done
+[04/03/18 09:08:52:052 CST] ZkClient-EventThread-13-10.1.24.101:2181 DEBUG ZkEventThread.run(ZkEventThread.java:69): Delivering event #2 ZkEvent[State changed to Disconnected sent to com.soa.other.zk.CreateSession$1@4901fdb6]
+handleStateChanged,stat:Disconnected
+[04/03/18 09:08:52:052 CST] ZkClient-EventThread-13-10.1.24.101:2181 DEBUG ZkEventThread.run(ZkEventThread.java:79): Delivering event #2 done
+[04/03/18 09:08:53:053 CST] ZkClient-EventThread-13-10.1.24.101:2181 DEBUG ZkEventThread.run(ZkEventThread.java:69): Delivering event #3 ZkEvent[State changed to Expired sent to com.soa.other.zk.CreateSession$1@4901fdb6]
+handleStateChanged,stat:Expired
+[04/03/18 09:08:53:053 CST] ZkClient-EventThread-13-10.1.24.101:2181 DEBUG ZkEventThread.run(ZkEventThread.java:79): Delivering event #3 done
+[04/03/18 09:08:53:053 CST] ZkClient-EventThread-13-10.1.24.101:2181 DEBUG ZkEventThread.run(ZkEventThread.java:69): Delivering event #4 ZkEvent[New session event sent to com.soa.other.zk.CreateSession$1@4901fdb6]
+handleNewSession()
+[04/03/18 09:08:53:053 CST] ZkClient-EventThread-13-10.1.24.101:2181 DEBUG ZkEventThread.run(ZkEventThread.java:79): Delivering event #4 done
+[04/03/18 09:08:54:054 CST] main-SendThread(10.1.24.101:2181) DEBUG ClientCnxn$SendThread.readResponse(ClientCnxn.java:756): Got ping response for sessionid: 0x1001b2f252e0053 after 320ms
+[04/03/18 09:08:54:054 CST] main-EventThread  INFO ClientCnxn$EventThread.run(ClientCnxn.java:516): EventThread shut down
+[04/03/18 09:08:54:054 CST] ZkClient-EventThread-13-10.1.24.101:2181 DEBUG ZkEventThread.run(ZkEventThread.java:69): Delivering event #5 ZkEvent[Data of /aganNode changed sent to com.soa.other.zk.SubscribeDataChanges$ZKDataListener@2b3f6f1d]
+[04/03/18 09:08:54:054 CST] main-SendThread(10.1.24.101:2181) DEBUG ClientCnxn$SendThread.readResponse(ClientCnxn.java:836): Reading reply sessionid:0x1001b2f252e0053, packet:: clientPath:null serverPath:null finished:false header:: 2,3  replyHeader:: 2,1575,0  request:: '/aganNode,T  response:: s{1532,1572,1520167745857,1520168877236,9,0,0,0,30,0,1532} 
+[04/03/18 09:08:54:054 CST] main-SendThread(10.1.24.101:2181) DEBUG ClientCnxn$SendThread.readResponse(ClientCnxn.java:836): Reading reply sessionid:0x1001b2f252e0053, packet:: clientPath:null serverPath:null finished:false header:: 3,4  replyHeader:: 3,1575,0  request:: '/aganNode,T  response:: #ffffffacffffffed057401755736572205b69643d322c206e616d653d6167616e315d,s{1532,1572,1520167745857,1520168877236,9,0,0,0,30,0,1532} 
+[04/03/18 09:08:58:058 CST] main-SendThread(10.1.24.101:2181) DEBUG ClientCnxn$SendThread.readResponse(ClientCnxn.java:756): Got ping response for sessionid: 0x1001b2f252e0053 after 622ms
+订阅节点的数据内容的变化/aganNode:User [id=2, name=agan1]
+[04/03/18 09:09:01:001 CST] ZkClient-EventThread-13-10.1.24.101:2181 DEBUG ZkEventThread.run(ZkEventThread.java:79): Delivering event #5 done
+[04/03/18 09:09:02:002 CST] ZkClient-EventThread-13-10.1.24.101:2181 DEBUG ZkEventThread.run(ZkEventThread.java:69): Delivering event #6 ZkEvent[State changed to SyncConnected sent to com.soa.other.zk.CreateSession$1@4901fdb6]
+handleStateChanged,stat:SyncConnected
+[04/03/18 09:09:04:004 CST] ZkClient-EventThread-13-10.1.24.101:2181 DEBUG ZkEventThread.run(ZkEventThread.java:79): Delivering event #6 done
+[04/03/18 09:09:04:004 CST] main-SendThread(10.1.24.101:2181) DEBUG ClientCnxn$SendThread.readResponse(ClientCnxn.java:756): Got ping response for sessionid: 0x1001b2f252e0053 after 698ms
+[04/03/18 09:09:07:007 CST] main-SendThread(10.1.24.101:2181) DEBUG ClientCnxn$SendThread.readResponse(ClientCnxn.java:756): Got ping response for sessionid: 0x1001b2f252e0053 after 9ms
+[04/03/18 09:09:10:010 CST] main-SendThread(10.1.24.101:2181) DEBUG ClientCnxn$SendThread.readResponse(ClientCnxn.java:756): Got ping response for sessionid: 0x1001b2f252e0053 after 7ms
+[04/03/18 09:09:13:013 CST] main-SendThread(10.1.24.101:2181) DEBUG ClientCnxn$SendThread.readResponse(ClientCnxn.java:756): Got ping response for sessionid: 0x1001b2f252e0053 after 13ms
+[04/03/18 09:09:17:017 CST] main-SendThread(10.1.24.101:2181) DEBUG ClientCnxn$SendThread.readResponse(ClientCnxn.java:756): Got ping response for sessionid: 0x1001b2f252e0053 after 8ms
+[04/03/18 09:09:20:020 CST] main-SendThread(10.1.24.101:2181) DEBUG ClientCnxn$SendThread.readResponse(ClientCnxn.java:756): Got ping response for sessionid: 0x1001b2f252e0053 after 7ms
+[04/03/18 09:09:23:023 CST] main-SendThread(10.1.24.101:2181) DEBUG ClientCnxn$SendThread.readResponse(ClientCnxn.java:756): Got ping response for sessionid: 0x1001b2f252e0053 after 6ms
+[04/03/18 09:09:27:027 CST] main-SendThread(10.1.24.101:2181) DEBUG ClientCnxn$SendThread.readResponse(ClientCnxn.java:756): Got ping response for sessionid: 0x1001b2f252e0053 after 6ms
