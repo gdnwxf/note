@@ -1,0 +1,35 @@
+cobar服务端 源码分析
+
+服务端入口 CobarStartup
+	CobarServer server = CobarServer.getInstance();
+	--> CobarServer INSTANCE = new CobarServer();
+		--> this.config = new CobarConfig();
+			--> ConfigInitializer confInit = new ConfigInitializer(); 实例化配置文件
+				--> SchemaLoader schemaLoader = new XMLSchemaLoader(); 实例化配置文件
+				--> XMLConfigLoader configLoader = new XMLConfigLoader(schemaLoader);
+					--> XMLServerLoader serverLoader = new XMLServerLoader();
+						--> XMLServerLoader.load() // server.xml 文件中内容
+							--> loadSystem(root); // 实例化系统的参数等信息
+							--> loadUsers(root); //实例化用户 密码 以及 访问的 schemas 
+							--> XMLServerLoader.cluster = new ClusterConfig(root, system.getServerPort()); 实例化集群配置 
+								--> ClusterConfig.nodes = Map<String, CobarNodeConfig> loadNode(Element root,system.getServerPort()) //实例化nodes的信息
+								--> ClusterConfig.groups = Map<String, List<String>> loadGroup(Element root,ClusterConfig.nodes) //实力化group的信息
+				--> RouteRuleInitializer.initRouteRule(schemaLoader); 实例化处理RouteRule
+				--> ConfigInitializer.dataNodes = initDataNodes(configLoader);
+					--> ConfigInitializer.dataNodes [Map<String, MySQLDataNode>]  <-- ClusterConfig.nodes
+						--> dataNodes = new HashMap<String, MySQLDataNode>(nodeConfs.size()) 
+							--> dataNode = new MySQLDataNode(dnc);	
+							--> dsList = new MySQLDataSource[dsNames.length];
+							--> dataNode.setSources(dsList); // 设置每个节点的数据源
+						--> dataNodes.put(dataNode.getName(), dataNode); // 将
+				--> this.cluster = initCobarCluster(configLoader);
+					--> ConfigInitializer.cluster = new CobarCluster(configLoader.getClusterConfig())
+						--> CobarCluster.nodes = new CobarNode(conf);
+							--> new CobarHeartbeat(this) // 集群中每个节点的心跳的信息
+								--> this.factory = new CobarDetectorFactory(); // 网络心跳Detector
+									--> CobarDetectorFactory.make 创建网络连接
+										--> SocketChannel channel = openSocketChannel(); // 打开网络channel
+										--> new CobarDetector(channel); //
+									--> CobarDetector.heartbeat() //发送心跳
+								--> this.recorder = new HeartbeatRecorder(); 心跳记录信息 做统计使用的
+	server.startup(); //启动服务
