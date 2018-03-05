@@ -56,4 +56,4 @@ reactor 模型启动
     --> server.start();
     --> timer.schedule(clusterHeartbeat(),x,x) 
     --> doDoubleCheckHeartBeat(); 检查delay的节点的心跳
-    --> scheduledExecutorService.scheduleAtFixedRate(new PerformanceDataSender(),x,x) 将收集到的信息发送到前端
+    --> scheduledExecutorService.scheduleAtFixedRate(new PerformanceDataSender(),x,x) 将收集到的信息发送到前端即 cobar-manager
