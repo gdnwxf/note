@@ -33,3 +33,9 @@ cobar服务端 源码分析
 									--> CobarDetector.heartbeat() //发送心跳
 								--> this.recorder = new HeartbeatRecorder(); 心跳记录信息 做统计使用的
 	server.startup(); //启动服务
+	--> new NIOProcessor[system.getProcessors()]; 实例化NIOProcessor 线程池
+	--> processors[i].startup(); 启动处理线程
+	--> timer.schedule(processorCheck(), 0L, system.getProcessorCheckPeriod()); 定时执行该方法，回收部分资源
+	--> NIOConnector connector = new NIOConnector(NAME + "Connector");  启动connector 
+	--> connector.setProcessors(processors); // 设置实例化的处理器 [ selectionKey.attach(theObject); selectionKey 附加到某个键上]
+    --> connector.start(); //启动reactor 模型 
