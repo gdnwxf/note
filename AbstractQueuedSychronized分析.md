@@ -1,3 +1,11 @@
+## 整体分析
+
+>  shared 和 exclusive 仅仅只是标识节点的状态  用来设置node的nextWaiter
+>
+>  初次入队列永远是哑节点(即head节点为一个 enq(node) 决定 这个节点会在AQS后面的操作中丢失)
+>
+>  acquireQueue() 是吧队列中当前节点去竞争队列的head节点 
+
 ### 从ReentranLock分析入手 (可重入锁分析)
 
 shared 和 exclusive 仅仅只是标识节点的状态
