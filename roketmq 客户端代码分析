@@ -1,0 +1,62 @@
+roketmq 客户端代码分析
+--> DefaultMQPushConsumer
+--> this.consumer = new DefaultMQPushConsumer(this.consumerGroup);// 设置小费组
+--> this.consumer.setNamesrvAddr(this.namesrvAddr); // 设置namesrvAddr
+--> this.consumer.setConsumeThreadMin(this.consumeThreadMin); // 设置小费的线程数
+--> this.consumer.subscribe(this.topic, this.consumerHandle.getSubExpression()); // 设置topic 
+--> this.consumer.setConsumeFromWhere(this.consumeFromWhere); // Consumer第一次启动默认从队列尾部开始消费 如果非第一次启动，那么按照上次消费的位置继续消费
+--> if (this.consumeFromWhere.equals(ConsumeFromWhere.CONSUME_FROM_TIMESTAMP) && !MD5Util.stringIsEmpty(this.consumeTimestamp)) {
+-->     this.consumer.setConsumeTimestamp(this.consumeTimestamp); //设置回溯的消费时间
+--> }
+	// 设置消费方式 并发/顺序
+--> switch(this.registerConsumeType) {
+--> case ORDERLY:
+-->     this.consumer.registerMessageListener(new ConsumerListenerForRm.BaseListenerOrderly(null));
+-->     break;
+--> case CONCURRENTLY:
+--> default:
+-->     this.consumer.registerMessageListener(new ConsumerListenerForRm.BaseListenerConcurrently(null));
+--> }
+	// 启动
+--> this.consumer.start();
+	--> this.copySubscription(); //形成  // 默认订阅消息重试Topic %RETRY%+ consumerGroup
+		|-> this.rebalanceImpl.getSubscriptionInner().put(retryTopic, subscriptionData);
+	--> this.defaultMQPushConsumer.changeInstanceNameToPID(); // 改变默认的instanceName
+	--> mQClientFactory = MQClientManager.getInstance().getAndCreateMQClientInstance(this.defaultMQPushConsumer, this.rpcHook);
+		|- 实例化mqClientInstance 
+		--> this.nettyClientConfig = new NettyClientConfig();
+			// Client接收Broker的回调操作，例如事务回调，或者其他管理类命令回调
+		--> clientRemotingProcessor = new ClientRemotingProcessor(this); 
+			//封装所有与服务器通信部分API
+		--> mQClientAPIImpl = new MQClientAPIImpl(this.nettyClientConfig, this.clientRemotingProcessor, rpcHook); 
+	
+		-->  this.mQAdminImpl = new MQAdminImpl(this); 管理类接口实现 
+		--> this.pullMessageService = new PullMessageService(this); 定时拉取消息的服务默认是立即执行
+		--> this.rebalanceService = new RebalanceService(this); Rebalance服务  
+		--> this.defaultMQProducer = new DefaultMQProducer(MixAll.CLIENT_INNER_PRODUCER_GROUP); // 消息生产者，适合使用spring初始化
+		--> this.defaultMQProducer.resetClientConfig(clientConfig); 重置clientconfig
+		--> this.consumerStatsManager = new ConsumerStatsManager(this.scheduledExecutorService); // 消费者统计管理
+			--> this.topicAndGroupConsumeOKTPS = new StatsItemSet(TOPIC_AND_GROUP_CONSUME_OK_TPS, scheduledExecutorService, log);
+			--> this.topicAndGroupConsumeRT = new StatsItemSet(TOPIC_AND_GROUP_CONSUME_RT, scheduledExecutorService, log);
+			--> this.topicAndGroupConsumeOKTPS = new StatsItemSet(TOPIC_AND_GROUP_CONSUME_OK_TPS, scheduledExecutorService, log);
+   	     --> this.topicAndGroupConsumeFailedTPS = new StatsItemSet(TOPIC_AND_GROUP_CONSUME_FAILED_TPS, scheduledExecutorService, log);
+   	     --> this.topicAndGroupPullTPS = new StatsItemSet(TOPIC_AND_GROUP_PULL_TPS, scheduledExecutorService, log);
+   		    --> this.topicAndGroupPullRT = new StatsItemSet(TOPIC_AND_GROUP_PULL_RT, scheduledExecutorService, log);
+	// 初始化Rebalance变量
+	-->this.rebalanceImpl.setConsumerGroup(this.defaultMQPushConsumer.getConsumerGroup());
+	-->this.rebalanceImpl.setMessageModel(this.defaultMQPushConsumer.getMessageModel());
+	-->this.rebalanceImpl.setAllocateMessageQueueStrategy(this.defaultMQPushConsumer.getAllocateMessageQueueStrategy());
+	-->this.rebalanceImpl.setmQClientFactory(this.mQClientFactory);
+	// 对Pull接口进行进一步的封装
+	-->this.pullAPIWrapper = new PullAPIWrapper( mQClientFactory,this.defaultMQPushConsumer.getConsumerGroup(), isUnitMode());
+	// 每次拉消息之后，都会进行一次过滤。
+	-->this.pullAPIWrapper.registerFilterMessageHook(filterMessageHookList);
+	-->this.consumeMessageService = new ConsumeMessageConcurrentlyService(this, (MessageListenerConcurrently) this.getMessageListenerInner()); // 启动消息服务
+	-->this.consumeMessageService.start(); 消息服务启动
+	--> boolean registerOK = mQClientFactory.registerConsumer(this.defaultMQPushConsumer.getConsumerGroup(), this);
+	--> mQClientFactory.start();
+		--> this.mQClientAPIImpl.start();
+		--> this.startScheduledTask(); //定时获取nameSvrAddr
+		--> this.pullMessageService.start(); //启动拉取消息的服务
+		--> this.rebalanceService.start(); //更新本地队列 
+		--> this.defaultMQProducer.getDefaultMQProducerImpl().start(false); // 同DefaultMQPushConsumerImpl.start 和 DefaultMQPullConsumerImpl.start

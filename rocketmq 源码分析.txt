@@ -1,0 +1,13 @@
+rocketmq 源码分析
+ 
+工程 broker 
+依赖项目的  common(通用工具) store (存储) remoting   client(与客户端的链接) srvutil(服务工具)  filter
+入口主类 BrokerStartup
+-->start(createBrokerController(args));
+	--> createBrokerController(args)
+		--> BrokerConfig brokerConfig = new BrokerConfig();
+		--> NettyServerConfig nettyServerConfig = new NettyServerConfig();
+		--> NettyClientConfig nettyClientConfig = new NettyClientConfig();
+		--> MessageStoreConfig messageStoreConfig = new MessageStoreConfig();
+
+	--> controller.start();
