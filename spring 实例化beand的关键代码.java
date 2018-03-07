@@ -1,5 +1,7 @@
 Abstract 
 
+
+DefaultSingletonBeanRegistry.singletonObjects  这个地方存放的是BeanFactory 也即时ObjectFactory
 DefaultListableBeanFactory表示的是 Factory  FactoryBean 表示这个Bean是特殊的bean
 1 从singletonObjects拿到FactoryBean  
 DefaultListableBeanFactory.preInstantiateSingletons
