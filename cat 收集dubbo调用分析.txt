@@ -1,0 +1,9 @@
+cat 收集dubbo调用分析
+	Filter 继承于dubbo的filter
+--> Cat.isInitialized() // cat的实例化
+	--> String rootId = Cat.getCurrentRootId(); // 获取
+		--> MessageTree tree = Cat.getManager().getThreadLocalMessageTree(); 获取ThreadContext中的MessageTree
+			--> ctx = new Context(m_domain.getId(), m_hostName, m_domain.getIp()); 实例化context
+				// 重要参数 [ netty 中的ByteBuff]private ByteBuf m_buf; [封装的事件处理器] private Message m_message;
+				--> m_tree = new DefaultMessageTree();  
+				--> m_stack = new Stack<Transaction>();

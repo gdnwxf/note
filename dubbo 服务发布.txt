@@ -1,0 +1,2 @@
+dubbo 服务发布
+  Wrapper 中存 private static final Map<Class<?>, Wrapper> WRAPPER_MAP = new ConcurrentHashMap<Class<?>, Wrapper>(); //class wrapper map

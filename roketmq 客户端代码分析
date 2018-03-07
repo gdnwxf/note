@@ -18,7 +18,7 @@ roketmq 客户端代码分析
 -->     this.consumer.registerMessageListener(new ConsumerListenerForRm.BaseListenerConcurrently(null));
 --> }
 	// 启动
---> this.consumer.start();
+--> (DefaultMQPushConsumer) this.consumer.start();
 	--> this.copySubscription(); //形成  // 默认订阅消息重试Topic %RETRY%+ consumerGroup
 		|-> this.rebalanceImpl.getSubscriptionInner().put(retryTopic, subscriptionData);
 	--> this.defaultMQPushConsumer.changeInstanceNameToPID(); // 改变默认的instanceName
