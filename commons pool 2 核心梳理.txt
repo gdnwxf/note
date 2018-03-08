@@ -1,0 +1,19 @@
+commons pool 2 核心梳理
+    里面有很大的扩展性 [如 activateObject, destroyObject, passivateObject, destroyObject]
+    -- 将对象放到SoftReference中来保持内存的使用与回收 private volatile SoftReference<T> reference;
+	--> new GenericObjectPool(new FlamePool(uniqueIdGenerator))
+	--> this(factory, new GenericObjectPoolConfig());
+	--> startEvictor(getTimeBetweenEvictionRunsMillis()); //  启动定时器去执行
+	--> if (delay > 0)  time in milliseconds before start and between eviction runs
+	--> evictor = new Evictor();
+		--> evict();  // evict 对象 [配置逐出时间,逐出对象]
+			--> evict = evictionPolicy.evict(evictionConfig, underTest,idleObjects.size()); //
+		--> ensureMinIdle(); // 保证最小的对象池里面的数据
+			--> ensureIdle(getMinIdle(), true);
+				--> p = create(); --> getLifo() ? idleObjects.addFirst(p)  : idleObjects.addLast(p); // 根据配置getLifo来查看添加到头部 还是添加到尾部
+	--> EvictionTimer.schedule(evictor, delay, delay);//启动定时器去执行
+
+	使用的时候掉用
+	--> GenericObjectPool.borrowObject()
+
+ 
