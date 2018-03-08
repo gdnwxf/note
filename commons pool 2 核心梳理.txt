@@ -1,5 +1,7 @@
 commons pool 2 核心梳理
     里面有很大的扩展性 [如 activateObject, destroyObject, passivateObject, destroyObject]
+    新创建的对象会放到Map<IdentityWrapper<T>, PooledObject<T>> allObjects中 destroy的时候remove掉 同时也从idleObjects移除
+    空闲的时候创建的对象放会放置到 LinkedBlockingDeque<PooledObject> idleObjects
     -- 将对象放到SoftReference中来保持内存的使用与回收 private volatile SoftReference<T> reference;
 	--> new GenericObjectPool(new FlamePool(uniqueIdGenerator))
 	--> this(factory, new GenericObjectPoolConfig());
@@ -15,5 +17,6 @@ commons pool 2 核心梳理
 
 	使用的时候掉用
 	--> GenericObjectPool.borrowObject()
+
 
  
