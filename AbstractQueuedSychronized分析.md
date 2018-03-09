@@ -1,5 +1,7 @@
 ## 整体分析
 
+* 重点  state  控制整体并发   waitStatus 控制节点是否能释放 是否 park  , unparkSuccessor 会吧waitStatus 设置成0 
+
 >  shared 和 exclusive 仅仅只是标识节点的状态  用来设置node的nextWaiter
 >
 >  初次入队列永远是哑节点(即head节点为一个 enq(node) 决定 这个节点会在AQS后面的操作中丢失)
