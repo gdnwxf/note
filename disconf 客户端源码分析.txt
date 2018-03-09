@@ -1,4 +1,15 @@
 disconf 客户端源码分析
+
+zk 中的节点 /disconf/retail-server_1.0.0_daily/file/barcodeThird.properties/retail-server_daily_10-1-6-131_0_fb318c20-3182-4628-9ec1-feb8b735243c
+1 先创建 /disconf 
+2 根据 disconf.properties 的信息生成的 /disconf/retail-server_1.0.0_daily
+3 在创建 /disconf/retail-server_1.0.0_dev/file or /disconf/retail-server_1.0.0_dev/item
+4 在创建 /disconf/retail-server_1.0.0_dev/file/barcodeThird.properties
+5 在创建 /disconf/retail-server_1.0.0_dev/file/barcodeThird.properties/wchdeMacBook-Pro.local_0_7cff0255-9059-4789-a587-4cca52466195
+
+去仓库中下载数据 和 zk 监听推送的数据 会出现主备竞争
+AOP的使用：通过对配置的get方法做切面，统一将用户的配置请求转发至 “我们自己的配置仓库” 里获取，从而实现统一读取。
+
 函数入口 
 --> first scan com.baidu.disconf.client.DisconfMgrBean (实现了 BeanDefinitionRegistryPostProcessor, PriorityOrdered, ApplicationContextAware) 
 	--> postProcessBeanFactory 
@@ -13,12 +24,40 @@ disconf 客户端源码分析
 				--> DisconfAutowareConfig.autowareConfig(INSTANCE, filePathInternal);  导入用户设置的 [disconf.properties, disconf.conf]的信息
 			--> Registry registry = RegistryFactory.getSpringRegistry(applicationContext); 从spring中查找bean
 			--> scanMgr = ScanFactory.getScanMgr(registry); 设置扫描器 [配置文件, 配置项, 非注解 托管的配置文件]
-			--> scanMgr.firstScan(scanPackageList) 第一次扫描并入库
-			--> disconfCoreMgr = DisconfCoreFactory.getDisconfCoreMgr(registry); 获取数据/注入/Watch 
+			--> scanMgr.firstScan(scanPackageList) 第一次扫描并入库 // 此次是解析类中 com.baidu.disconf的注解
+			--> disconfCoreMgr = DisconfCoreFactory.getDisconfCoreMgr(registry); 注入registry
+			--> disconfCoreMgr.process(); 获取数据/注入/Watch
+				--> disconfCoreProcessor.processAllItems();//
+					--> processOneItem(key);
+						--> disconfCenterItem = (DisconfCenterItem) disconfStoreProcessor.getConfData(key); //获取DisconfCenterItem
+						--> updateOneConfItem(key, disconfCenterItem); // 
+							--> fetcherMgr.getValueFromServer(url);
+							--> value = fetcherMgr.getValueFromServer(url); // 轮循重试去获取数据
+							     //通过下载文件或者restful接口去下载数据 拿取的数据是  ValueVo[status=1,message=,value=disconf-zk1.2dfire-daily.com:2181,disconf-zk2.2dfire-daily.com:2181,disconf-zk3.2dfire-daily.com:2181]
+							     即zk的注册地址
+							     第二次下载 prefix  ValueVo [status=1, message=, value=/disconf]
+								--> ValueVo confItemVo = restfulMgr.getJsonData(ValueVo.class, remoteUrl, retryTime, retrySleepSeconds);
+							--> disconfStoreProcessor.inject2Store(keyName, new DisconfValue(value, null)); // 将获取到的数据注入到实体中
+							--> if(DisClientConfig.getInstance().ENABLE_DISCONF) //判断是否支持分布式配置
+							--> DisConfCommonModel disConfCommonModel = disconfStoreProcessor.getCommonModel(keyName); 获取 DisConfCommonModel
+							--> watchMgr.watchPath(this, disConfCommonModel, keyName, DisConfigTypeEnum.ITEM, value); //zk
+							--> String monitorPath = makeMonitorPath(disConfigTypeEnum, disConfCommonModel, keyName, value);// 创建zk的节点 //如 retail-server_1.0.0_daily
+								--> ZookeeperMgr.getInstance().makeDir(clientRootZooPath, ZooUtils.getIp()); //创建二级节点
+								--> String clientDisconfFileZooPath = ZooPathMgr.getFileZooPath(clientRootZooPath);
+								--> makePath(clientDisconfFileZooPath, ZooUtils.getIp()); //以ip为data
+								--> monitorPath = ZooPathMgr.joinPath(clientDisconfFileZooPath, key); //
+								--> makePath(monitorPath, "");// 
+								--> makeTempChildPath(monitorPath, value); //创建 5 临时节点 data 为存储的数据
+							--> NodeWatcher nodeWatcher = new NodeWatcher(disconfCoreMgr, monitorPath, keyName, disConfigTypeEnum, new DisconfSysUpdateCallback(),
+							--> nodeWatcher.monitorMaster(); //向zk 中注入nodeWatcher 开始监听节点
 	--> registerAspect(registry) 
 		-->registry.registerBeanDefinition("disconfAspectJ", beanDefinition)  注册 DisconfAspectJ 切面
 
+在第一次扫描的时候已经通过 restfulMgr.getJsonData 去disconf-web中拿取数据啦
+--------------------------------------------------------------------第一次扫描完成 即完成BeanDefinition的创建 FactoryBean的实例化-------------------------------------------------------------------------------
 
+
+实例化数据
 
 --> second scan com.baidu.disconf.client.DisconfMgrBeanSecond 重复做一遍上述的内容
 	--> if(!isFirstInit) return 必须第一次做了之后才能做
@@ -30,3 +69,4 @@ disconf 客户端源码分析
 	 		--> transformPipelineService(scanDynamicModel.getDisconfUpdatePipeline()); 写入到仓库中
 	 			--> ScanDynamicModel.disconfUpdatePipeline //通用型的配置更新接口。当配置更新 时，用户可以实现此接口，用以来实现回调函数.
 	 			--> ((DisconfCenterStore) getInstance()).setiDisconfUpdatePipeline(iDisconfUpdatePipeline);
+
