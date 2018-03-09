@@ -1,6 +1,7 @@
 ## 整体分析
 
-* 重点  state  控制整体并发   waitStatus 控制节点是否能释放 是否 park  , unparkSuccessor 会吧waitStatus 设置成0 
+* 重点  state  控制整体并发   waitStatus 控制节点是否能释放 是否 park  , unparkSuccessor 会吧waitStatus 设置成0  
+* 处于cancel节点可能原因 当前节点被 unparkSuccessor 唤醒 
 
 >  shared 和 exclusive 仅仅只是标识节点的状态  用来设置node的nextWaiter
 >
@@ -281,5 +282,37 @@ static final class FairSync extends Sync {
         }
         return false;
     }
+}
+```
+
+shouldParkAfterFailedAcquire 方法
+
+```java
+private static boolean shouldParkAfterFailedAcquire(Node pred, Node node) {
+    int ws = pred.waitStatus;
+    if (ws == Node.SIGNAL)
+        /*
+         * This node has already set status asking a release
+         * to signal it, so it can safely park.
+         */
+        return true;
+    if (ws > 0) {
+        /*
+         * Predecessor was cancelled. Skip over predecessors and
+         * indicate retry.
+         */
+        do {
+            node.prev = pred = pred.prev;
+        } while (pred.waitStatus > 0);
+        pred.next = node;
+    } else {
+        /*
+         * waitStatus must be 0 or PROPAGATE.  Indicate that we
+         * need a signal, but don't park yet.  Caller will need to
+         * retry to make sure it cannot acquire before parking.
+         */
+        compareAndSetWaitStatus(pred, ws, Node.SIGNAL);
+    }
+    return false;
 }
 ```
