@@ -1,0 +1,18 @@
+spring 内存clean 分析
+// 适用于web
+入口类  org.springframework.web.util.IntrospectorCleanupListener
+ 	spring中有用到 Set<ClassLoader> CachedIntrospectionResults.acceptedClassLoaders 存起来
+ 	--> 继承自 javax.servlet.ServletContextListener
+ 	// spring中的注释
+ 	/**
+	 * Set of ClassLoaders that this CachedIntrospectionResults class will always
+	 * accept classes from, even if the classes do not qualify as cache-safe.
+	 */
+	 --> contextInitialized 实例化的方法 将ServletContextListener ThreadContextLoader add -> acceptedClassLoaders
+	 --> contextDestroyed   销毁对象的方法  看看是否有当前classloader 是基于[将ServletContextListener]
+	  1 ThreadContextLoader 作为父classloader 的loader 然后从 acceptedClassLoaders remove掉  
+	  2 吧spring中 strongClassCache 是基于以上classloader 加载的类移除掉 
+	  3 吧spring中 softClassCache 是基于以上classloader 加载的类移除掉
+	 --> Introspector.flushCaches();  
+	 1 把 ThreadGroupContext.beanInfoCache clear
+	 2 把 Introspector.declaredMethodCache.clear();
