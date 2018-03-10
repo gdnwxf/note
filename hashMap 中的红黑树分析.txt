@@ -70,5 +70,45 @@ hashmap 类结构  extends AbstractMap implements Cloneable
 		                hd.treeify(tab);----------------------------------------//将节点转成红黑树									
 		        }																//			
 		    }																	//		
-		然后就是红黑树的实现
-		
+		然后就是红黑树的实现 (可参考此文章)
+		http://blog.csdn.net/sun_tttt/article/details/65445754
+
+		resize 关键代码
+
+		if ((e = oldTab[j]) != null) {
+	        oldTab[j] = null;
+	        if (e.next == null)
+	            newTab[e.hash & (newCap - 1)] = e;
+	        else if (e instanceof TreeNode)
+	            ((TreeNode<K,V>)e).split(this, newTab, j, oldCap); //如果是红黑树则split
+	        else { // preserve order
+	            Node<K,V> loHead = null, loTail = null;
+	            Node<K,V> hiHead = null, hiTail = null;
+	            Node<K,V> next;
+	            do {
+	                next = e.next;
+	                if ((e.hash & oldCap) == 0) {   				//将原来链表中链接拆分成低位 和 高位 2条链
+	                    if (loTail == null)
+	                        loHead = e;								
+	                    else
+	                        loTail.next = e;
+	                    loTail = e;
+	                }
+	                else {
+	                    if (hiTail == null)
+	                        hiHead = e;
+	                    else
+	                        hiTail.next = e;
+	                    hiTail = e;
+	                }
+	            } while ((e = next) != null);
+	            if (loTail != null) {
+	                loTail.next = null;
+	                newTab[j] = loHead;
+	            }
+	            if (hiTail != null) {
+	                hiTail.next = null;
+	                newTab[j + oldCap] = hiHead;
+	            }
+	        }
+    }
