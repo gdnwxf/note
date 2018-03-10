@@ -1,7 +1,12 @@
 ## 整体分析
 
 * 重点  state  控制整体并发   waitStatus 控制节点是否能释放 是否 park  , unparkSuccessor 会吧waitStatus 设置成0  
+
 * 处于cancel节点可能原因 当前节点被 unparkSuccessor 唤醒 
+
+* 如果遇到 thread interupte 则抛出异常 if shouldParkAfterFailedAcquire(p, node) &&
+
+  parkAndCheckInterrupt())  throw new InterruptedException(); // 然后就会取消任务
 
 >  shared 和 exclusive 仅仅只是标识节点的状态  用来设置node的nextWaiter
 >
