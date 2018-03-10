@@ -1,0 +1,74 @@
+JAVA8 中HASHMAP 分析 
+相关知识点 : 
+红黑树特点
+1. 每个节点是红色或黑色
+2. 根是黑色
+3. 叶节点（null）是黑色的
+4. 红色的节点的两个子结点均为黑色
+5. 对于每个节点，从该节点到其所有后代的简单路径上，均包含相同数目的黑色节点（我们把到叶节点的黑色节点数称为黑高）
+
+Spliterator
+（splitable iterator可分割迭代器）接口是Java为了并行遍历数据源中的元素而设计的迭代器，
+这个可以类比最早Java提供的顺序遍历迭代器Iterator，但一个是顺序遍历，一个是并行遍历
+	|- boolean tryAdvance(Consumer<? super T> action);顺序处理每个元素，类似Iterator，如果还有元素要处理，则返回true，否则返回false
+	|- Spliterator<T> trySplit();---------------------该方法会把当前元素划分一部分出去创建一个新的Spliterator作为返回，
+	|												  两个Spliterator变会并行执行，如果元素个数小到无法划分则返回null                          
+	|- long estimateSize();---------------------------该方法用于估算还剩下多少个元素需要遍历,影响代码执行线程数                           
+	|- int characteristics();-------------------------对流的计算有优化作用, 可能对计算结果会产生影响 
+	|- 												  return ORDERED | SIZED | SUBSIZED | NONNULL | IMMUTABLE |DISTINCT;   
+	|- forEachRemaining -->  do { } while (tryAdvance(action));  
+	|- getComparator()--------------------------------对sorted的流，给出比较器               
+
+参考 http://blog.163.com/silver9886@126/blog/static/359718622017818916446/
+	 http://blog.163.com/silver9886@126/blog/static/35971862201782111627311/
+	 上文章还有一些问题 于是有第二篇
+	 http://blog.163.com/silver9886@126/blog/static/35971862201782111627311/
+
+
+hashmap 最大容量  1 << 30 (Integer的最大值+1 ) / 2 
+hashmap 类结构  extends AbstractMap implements Cloneable
+		内部类结构 :
+			Node 
+			KeySet
+			Values
+			EntrySet
+			HashIterator 
+			KeyIterator
+			ValueIterator
+			EntryIterator
+			HashMapSpliterator
+			KeySpliterator
+			ValueSpliterator
+			EntrySpliterator
+			TreeNode  重点(红黑树的实现)
+		方法 :
+			构造方法4个 默认,initialCapacity, initialCapacity + loadFactor, Map
+
+		关键方法
+		putVal resize remove
+		关键数据结构
+		Node 实现 Map.Entry  TreeNode 都继承 LinkedHashMap.Entry
+		当hash 冲突达到一定条件的时候会转成链表 当链表的长度 >= 7 则当前链表转成红黑树
+		--> 关键代码
+			    final void treeifyBin(Node<K,V>[] tab, int hash) {				//															
+		        int n, index; Node<K,V> e;										//									
+		        if (tab == null || (n = tab.length) < MIN_TREEIFY_CAPACITY)		//																	
+		            resize();													//如果桶(slot)的个数即是容量没达到64时 则resize()
+		        else if ((e = tab[index = (n - 1) & hash]) != null) {			//																
+		            TreeNode<K,V> hd = null, tl = null;							//												
+		            do {														//					
+		                TreeNode<K,V> p = replacementTreeNode(e, null);      	//将每个node转成TreeNode	       
+		                if (tl == null)											//								
+		                    hd = p;												//							
+		                else {													//						
+		                    p.prev = tl;										//									
+		                    tl.next = p;										//									
+		                }														//					
+		                tl = p;													//						
+		            } while ((e = e.next) != null);								//此while 循环生成一个TreeNode的双向链表											
+		            if ((tab[index] = hd) != null)								//											
+		                hd.treeify(tab);----------------------------------------//将节点转成红黑树									
+		        }																//			
+		    }																	//		
+		然后就是红黑树的实现
+		
