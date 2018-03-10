@@ -8,11 +8,61 @@
 
   parkAndCheckInterrupt())  throw new InterruptedException(); // 然后就会取消任务
 
->  shared 和 exclusive 仅仅只是标识节点的状态  用来设置node的nextWaiter
+*  cancelAcquire 节点的情况  呗唤醒 park超时
+
+> shared 和 exclusive 仅仅只是标识节点的状态  用来设置node的nextWaiter
 >
->  初次入队列永远是哑节点(即head节点为一个 enq(node) 决定 这个节点会在AQS后面的操作中丢失)
+> 初次入队列永远是哑节点(即head节点为一个 enq(node) 决定 这个节点会在AQS后面的操作中丢失)
 >
->  acquireQueue() 是吧队列中当前节点去竞争队列的head节点 
+> acquireQueue() 是吧队列中当前节点去竞争队列的head节点
+
+节点的呗唤醒后的关键方法
+
+```java
+private void cancelAcquire(Node node) {
+    // Ignore if node doesn't exist
+    if (node == null)
+        return;
+
+    node.thread = null;
+
+    // Skip cancelled predecessors
+    Node pred = node.prev;
+    while (pred.waitStatus > 0) // 跳过队列中 waitStatus > 0 cancel 节点
+        node.prev = pred = pred.prev;
+	
+    // predNext is the apparent node to unsplice. CASes below will
+    // fail if not, in which case, we lost race vs another cancel
+    // or signal, so no further action is necessary.
+    Node predNext = pred.next;
+
+    // Can use unconditional write instead of CAS here.
+    // After this atomic step, other Nodes can skip past us.
+    // Before, we are free of interference from other threads.
+    node.waitStatus = Node.CANCELLED;
+
+    // If we are the tail, remove ourselves.
+    if (node == tail && compareAndSetTail(node, pred)) {
+        compareAndSetNext(pred, predNext, null);
+    } else {
+        // If successor needs signal, try to set pred's next-link
+        // so it will get one. Otherwise wake it up to propagate.
+        int ws;
+        if (pred != head &&
+            ((ws = pred.waitStatus) == Node.SIGNAL ||
+             (ws <= 0 && compareAndSetWaitStatus(pred, ws, Node.SIGNAL))) &&
+            pred.thread != null) {
+            Node next = node.next;
+            if (next != null && next.waitStatus <= 0)
+                compareAndSetNext(pred, predNext, next);  // 将中间waitStatus > 0 的节点从队列中移除
+        } else {
+            unparkSuccessor(node);
+        }
+
+        node.next = node; // help GC
+    }
+}
+```
 
 ### 从ReentranLock分析入手 (可重入锁分析)
 
