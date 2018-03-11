@@ -104,11 +104,11 @@ hashmap 类结构  extends AbstractMap implements Cloneable
 	                if ((e.hash & oldCap) == 0) {   				//将原来链表中链接拆分成低位 和 高位 2条链  
 	                												//其中hash = (key == null) ? 0 : (h = key.hashCode()) ^ (h >>> 16);
 	                    if (loTail == null)
-	                        loHead = e;								
+	                        loHead = e;			 @1						
 	                    else
-	                        loTail.next = e;
-	                    loTail = e;
-	                }
+	                        loTail.next = e;	 @3					//loTail 做为游标 loTail 代表上一次的 e 该链实际上在loHead上( 因为loTail = e)
+	                    loTail = e;              @2   				//参照 @1 @2 @3  的顺序分析
+	                } 
 	                else {
 	                    if (hiTail == null)
 	                        hiHead = e;
