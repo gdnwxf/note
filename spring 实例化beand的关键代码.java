@@ -24,7 +24,7 @@ protected Object getObjectForBeanInstance(
    Object object = null;
    if (mbd == null) {
       object = getCachedObjectForFactoryBean(beanName); // 这个是从 FactoryBeanRegistrySupport.factoryBeanObjectCache 拿到数据
-   6,   if (object == null) {
+      if (object == null) {
       // Return bean instance from factory.
       FactoryBean<?> factory = (FactoryBean<?>) beanInstance; // 传入FactoryBean 即是Spring中的Factory
       // Caches object obtained from FactoryBean if it is a singleton.
