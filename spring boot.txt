@@ -56,5 +56,7 @@ spring boot 分析
 		//创建bean beanDefinitonLoader.load --> 创建 BeanDefinitionHolder --> AnnotationConfigApplicationContext.注册definitionHolder
 		-->load(context, sources.toArray(new Object[sources.size()]));
 		-->listeners.contextLoaded(context);//listeners再次通知事件
-		-->refreshContext(context); //AbstractApplicationContext.refresh()
-		-->afterRefresh(context, applicationArguments); //通知runner
+		-->refreshContext(context); //AbstractApplicationContext.refresh() -->  刷新完注册AnnotationConfigApplicationContext.registerShutdownHook
+		-->afterRefresh(context, applicationArguments); //通知runner 默认没有 如定时任务等等
+		-->listeners.finished(context, null); //listeners 发布时间完成  context.publishEvent(event);
+		--> return context; // 然后实例结束 服务启动
