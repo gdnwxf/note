@@ -1,0 +1,60 @@
+spring boot 分析
+		classLoader分析 由AppClassLoader 启动线程起来的 ThreadContextLoader 就是 AppClassLoader
+		和spring一样采用的是ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+		和java.util.ServiceLoader#load(java.lang.Class<S>) 一样
+		--> ClassLoader cl = Thread.currentThread().getContextClassLoader();
+		--> ServiceLoader.load(service, cl);
+	入口(SpringApplication.class)
+	 new SpringApplication(SpringApplicationStart.class) ;
+	 	--> initialize(sources);
+	 		-->this.sources.addAll(Arrays.asList(sources)); // 添加到
+	 		-->this.webEnvironment = deduceWebEnvironment(); //
+	 		// 设置并加载ApplicationContextInitializer [该配置在 META-INF/spring.factories 文件中]
+	 		-->setInitializers((Collection) getSpringFactoriesInstances( ApplicationContextInitializer.class)); 
+	 		// 设置并加载ApplicationListener [该配置在 META-INF/spring.factories 文件中]
+	 		-->setListeners((Collection) getSpringFactoriesInstances(ApplicationListener.class));
+	 springApplication.run(args); //开始启动
+		//获取spring boot 中# Run Listeners 也是在[spring.factories]中配置的
+		org.springframework.boot.SpringApplicationRunListener=org.springframework.boot.context.event.EventPublishingRunListener
+		--> SpringApplicationRunListeners listeners = getRunListeners(args);
+		// 启动监听事件 然后通过 EventPublishingRunListener 中的SimpleApplicationEventMulticaster 发布 application.getListeners()
+		// 也就是上面 ApplicationListener 
+		--> listeners.starting(); 
+			// 发布监听事件
+			-->this.initialMulticaster.multicastEvent(new ApplicationStartedEvent(this.application, this.args));
+				-->multicastEvent(event, resolveDefaultEventType(event));
+					--> listener.onApplicationEvent //执行listener的onApplicationEvent 事件
+		//准备spring boot的环境
+		-->ConfigurableEnvironment environment = prepareEnvironment(listeners,applicationArguments); [ApplicationEnvironmentPreparedEvent]
+			-->ConfigurableEnvironment environment = getOrCreateEnvironment();
+				--> if (this.environment != null) return this.environment;
+				--> if (this.webEnvironment) return new StandardServletEnvironment(); //实例化标准ServletdEnvironment 环境
+				--> return new StandardEnvironment(); // 如果上面2个environment 都没有 则实例化一个标准的环境 里面包含了系统以及用户设置的环境变量
+			-->configureEnvironment(environment, applicationArguments.getSourceArgs()); //初始化 profiles, ActiveProfiles ,整合environment 的PropertySources
+			-->listeners.environmentPrepared(environment); // 每个listener 又去实例化一遍
+			// 当不是webEnvironment的时候 将之前实例化的环境 和 classLoader 一起convertToStandardEnvironment
+			// ClassUtils.getDefaultClassLoader(); 返回的是一个ThreadContextLoader
+			-->if (!this.webEnvironment) environment = new EnvironmentConverter(getClassLoader()).convertToStandardEnvironmentIfNecessary(environment);
+			-->return environment;
+		-->Banner printedBanner = printBanner(environment); //打印spring-boot的标志
+		//DEFAULT_WEB_CONTEXT_CLASS [内嵌容器] org.springframework.boot.context.embedded.AnnotationConfigEmbeddedWebApplicationContext
+		//DEFAULT_CONTEXT_CLASS [默认容器] org.springframework.contextannotation.AnnotationConfigApplicationContext
+		//WEB_ENVIRONMENT_CLASSES { "javax.servlet.Servlet", "org.springframework.web.context.ConfigurableWebApplicationContext" }
+		//由于此次分析的不是web应用 此context是通过AppClassLoader实例化的
+		//this.reader = new AnnotatedBeanDefinitionReader(this);
+		//this.scanner = new ClassPathBeanDefinitionScanner(this);
+		-->context = createApplicationContext(); // webEnvironment ? DEFAULT_WEB_CONTEXT_CLASS : DEFAULT_CONTEXT_CLASS
+		//分析循环引用, nosuchbean ,no unique bean,contection fail 等 org.springframework.boot.diagnostics.FailureAnalyzer
+		//AppClassLoader
+		-->analyzers = new FailureAnalyzers(context);
+		//准备context
+		-->prepareContext(context, environment, listeners, applicationArguments,printedBanner);
+		-->context.setEnvironment(environment); //设置环境
+		-->postProcessApplicationContext(context); //执行post方法
+		-->applyInitializers(context); // 之前配置的ApplicationContextInitializer实例化
+		-->listeners.contextPrepared(context); // 执行 EventPublishingRunListener.contextPrepared
+		//创建bean beanDefinitonLoader.load --> 创建 BeanDefinitionHolder --> AnnotationConfigApplicationContext.注册definitionHolder
+		-->load(context, sources.toArray(new Object[sources.size()]));
+		-->listeners.contextLoaded(context);//listeners再次通知事件
+		-->refreshContext(context); //AbstractApplicationContext.refresh()
+		-->afterRefresh(context, applicationArguments); //通知runner

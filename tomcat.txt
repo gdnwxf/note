@@ -1,0 +1,6 @@
+
+tomcat的类加载机制
+	放置在/common目录中：类库可被Tomcat和所有的Web应用程序共同使用。
+	放置在/server目录中：类库可被Tomcat使用，对所有的Web应用程序都不可见。
+	放置在/shared目录中：类库可被所有的Web应用程序共同使用，但对Tomcat自己不可见。
+	放置在/WebApp/WEB-INF目录中：类库仅仅可以被此Web应用程序使用，对Tomcat和其他Web应用程序都不可见
