@@ -1,7 +1,7 @@
 ReentrantReadWriteLock 分析
 	重点分析 Sync
-	高位放读锁  
-	低位放写锁
+	高位放读锁 16  
+	低位放写锁 16
     static final int SHARED_SHIFT   = 16;
     static final int SHARED_UNIT    = (1 << SHARED_SHIFT);
     static final int MAX_COUNT      = (1 << SHARED_SHIFT) - 1;
@@ -11,3 +11,8 @@ ReentrantReadWriteLock 分析
     static int sharedCount(int c)    { return c >>> SHARED_SHIFT; }    //得到高位的readLock的线程个数
     /** Returns the number of exclusive holds represented in count  */
     static int exclusiveCount(int c) { return c & EXCLUSIVE_MASK; }    //得到低位write的个数
+
+    读的时候可以写
+    写的时候
+
+    当读线程进来的时候 前面有读线程 进入队列阻塞 当前是写线程hold则如队列阻塞
