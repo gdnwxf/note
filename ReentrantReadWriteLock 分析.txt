@@ -11,3 +11,4 @@ ReentrantReadWriteLock 分析
     static int sharedCount(int c)    { return c >>> SHARED_SHIFT; }    //得到高位的readLock的线程个数
     /** Returns the number of exclusive holds represented in count  */
     static int exclusiveCount(int c) { return c & EXCLUSIVE_MASK; }    //得到低位write的个数
+
