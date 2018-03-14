@@ -56,3 +56,57 @@ lock的算法细节 :
 
 poxos + ZAB 协议
 http://blog.csdn.net/u013679744/article/details/79240249
+http://blog.csdn.net/weixin_39800144/article/details/79316544
+
+-1 集群角色 <Leader> <Follower> <Observer>
+0 会话 <TCP长连接>  <SessionTimeout控制session会话>
+1 DataTree是内存数据存储的核心
+2 节点特性  <临时与会话绑定, 且不能创建子节点>
+3 zooKeeper中每个znode的Stat结构体由下述字段构成：
+    czxid：创建节点的事务的zxid
+    mzxid：对znode最近修改的zxid
+    ctime：以距离时间原点(epoch)的毫秒数表示的znode创建时间
+    mtime：以距离时间原点(epoch)的毫秒数表示的znode最近修改时间
+    version：znode数据的修改次数
+    cversion：znode子节点修改次数 <cas> <version = -1 表示不需要检查版本>
+    aversion：znode的ACL修改次数
+    ephemeralOwner：如果znode是临时节点，则指示节点所有者的会话ID；如果不是临时节点，则为零。
+    dataLength：znode数据长度。
+    numChildren：znode子节点个数。
+4 Watcher机制  <发布,订阅>
+	| 1.一次性触发  数据发生改变时，一个watcher event会被发送到client，但是client只会收到一次这样的信息。
+    | 2.watcher event异步发送, 由于网络延迟或其他因素导致客户端在不通的时刻监听到事件，由于Zookeeper本身提供了ordering guarantee，即客户端监听事件后，才会感知它所监视znode发生了变化。< 先发事件通知,再感知数据>  
+    | 3.Zookeeper有数据监视和子数据监视   getdata() and exists() 设置数据监视，getchildren()设置了子节点监视
+    |-http://blog.csdn.net/u013679744/article/details/79230418 
+5 ACL--保障数据的安全 <分为三个维度：scheme、id、permission> [schema代表授权策略，id代表用户，permission代表权限.]
+	| schema <digest digest:username:BASE64(SHA1(password)):cdrwa >
+	| schema <ip:192.168.1.100:rw >
+	| schema <world:anyone:cdrwa >
+	| schema <host>
+	| schema <super>
+	| schema <Auth>
+	permission 
+		| CREATE(r)：创建子节点的权限
+		| DELETE(d)：删除节点的权限
+		| READ(r)：读取节点数据的权限
+		| WRITE(w)：修改节点数据的权限
+		| ADMIN(a)：设置子节点权限的权限
+6 Zookeeper内存模型
+    > DataTree是整个树的核心，不与任何网络、客户端以及请求事务有关。
+    > DataTree利用CurrentHashMap<String,DataNode>的属性nodes来存储着整个树的所有节点以及对应的路径，
+    > 对于临时节点单独放在一个CurrentHashMap中。
+    > DataNode是最小的存储单元，保存着节点的数据，ACL，父节点和子节点列表。
+	| DataTree
+	| DataNode
+	| ZKDatabase 
+		> Zookeeper的内存数据库，
+		> 管理Zookeeper的所有会话、
+		> DataTree存储和事务日志。
+		> ZKDatabase会定时向磁盘dump快照数据，
+		> 同时在Zookeeper启动时，会通过磁盘的事务日志和快照文件恢复成一个完整的内存数据库
+7 Zookeeper数据与存储
+	事务日志：
+	数据快照：
+	过半随机策略：
+	进行快照：
+	数据恢复：
