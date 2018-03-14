@@ -1,7 +1,7 @@
 ReentrantReadWriteLock 分析
 	重点分析 Sync
-	高位放读锁  
-	低位放写锁
+	高位放读锁 16  
+	低位放写锁 16
     static final int SHARED_SHIFT   = 16;
     static final int SHARED_UNIT    = (1 << SHARED_SHIFT);
     static final int MAX_COUNT      = (1 << SHARED_SHIFT) - 1;
@@ -11,4 +11,19 @@ ReentrantReadWriteLock 分析
     static int sharedCount(int c)    { return c >>> SHARED_SHIFT; }    //得到高位的readLock的线程个数
     /** Returns the number of exclusive holds represented in count  */
     static int exclusiveCount(int c) { return c & EXCLUSIVE_MASK; }    //得到低位write的个数
+
+    1 底高位分析 state是volitale 的用于原子跟新 
+    2 用2个值的话 无法保证2个值是原子更新的 或是更难维护
+    读的时候可以写
+    写的时候
+
+    当读线程进来的时候 前面有读线程 进入队列阻塞 当前是写线程hold则如队列阻塞
+
+    1 读锁在写锁存在 (且 cThread != exclusive )时候进入等待 读锁本身不会设置exclusive
+    2 读锁不在 hold的时候 也会进入等待
+    # 也就是说当写锁存在的时候  后面进入的读锁都将等待 和后面进入写锁一样进入等待
+    3 当队列中的写锁没有释放完的时候 是不会去唤醒后继节点的 ( 会等待读锁去 doAcquireShared (读锁自旋去唤醒) 自旋去唤醒读锁)
+
+    4 如果写锁释放之后 第二个节点也是写锁节点 那么该节点不应该阻塞 如果之前的写锁上hold了很多的读锁也不应该阻塞  
+    5 如果后面的节点在自旋的时候 park 了则靠自己 interrupt唤醒
 
