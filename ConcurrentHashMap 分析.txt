@@ -1,0 +1,5 @@
+ConcurrentHashMap 分析
+	Thread.yield(); //让出cpu执行
+	1 大多数变量是volatile的
+	2 采用 cas 和 synchronized 
+	3 sychronized 锁住的是桶 
