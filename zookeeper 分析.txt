@@ -1,5 +1,17 @@
 zookeeper 分析
 
+zk 的典型应用场景
+	1 数据发布与订阅
+	2 负载均衡
+	3 
+	4 分布式协调/通知. <心跳检测> , <工作进度汇报> , <系统调度>
+	5 集群管理 <动态分配任务>
+	6 Master选举 
+	7 <控制搜索系统的全量索引的生成 >  , <在Hbase中 HMaster 选举,HRegionServer存活状态监控> , <分布式锁>
+	8 <FIFO先入先出> ,<Barrier分布式屏障>
+	9 <通过命名服务，客户端可以根据指定名字来获取资源的实体、服务地址和提供者的信息，最常见的就是RPC 框架的服务地址列表的命名。>
+
+
 zk 配置
 	# The number of milliseconds of each tick
 	tickTime=2000
@@ -93,7 +105,7 @@ http://blog.csdn.net/weixin_39800144/article/details/79316544
 	| schema <host>
 	| schema <super>
 	| schema <Auth>
-	permission 
+	permission  <cd权限用于控制子节点，rwa权限用于控制节点本身>
 		| CREATE(r)：创建子节点的权限
 		| DELETE(d)：删除节点的权限
 		| READ(r)：读取节点数据的权限
