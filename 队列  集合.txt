@@ -1,9 +1,11 @@
 队列  集合 
+	Deque 				  //双向队列
 	ConcurrentSkipListMap //
 	ConcurrentHashMap
 	CopyOnWriteArrayList 
 	CopyOnWriteArraySet    代理的CopyOnWriteArrayList
-	ConcurrentLinkedDeque  双头队列
+	ConcurrentLinkedDeque  无界并发Deque实现  该队列也不允许空元素，而且size方法并不是常量时间，其需要遍历链表	，
+						   此时并发修改链表会造成统计size不正确。同样，bulk操作和equal以及toArray方法不保证原子性。
 	ConcurrentLinkedQueue  队列 poll
 	ArrayBlockingQueue     put == offer  poll == take  peek 查看下一个  remove
 
@@ -18,9 +20,9 @@
 	synchronizedMap / List
 
 	DelayQueue (java.util.concurrent)  	 代理PriorityQueue队列  DelayQueue是一个无界阻塞队列，只有在延迟期满时才能从中提取元素
-	ArrayBlockingQueue (java.util.concurrent)
-	PriorityBlockingQueue (java.util.concurrent)
+	ArrayBlockingQueue (java.util.concurrent) 
+	PriorityBlockingQueue (java.util.concurrent)  优先级队列 涉及到堆排序算法 PriorityQueue
 	LinkedBlockingQueue (java.util.concurrent)
-	LinkedTransferQueue (java.util.concurrent) 无界的阻塞队列LinkedTransferQueue 
+	LinkedTransferQueue (java.util.concurrent) 无界的阻塞队列LinkedTransferQueue  等到拿走才放 无锁
 	SynchronousQueue (java.util.concurrent)
 	BlockingDeque (java.util.concurrent)
