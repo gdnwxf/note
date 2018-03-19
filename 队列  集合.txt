@@ -15,7 +15,7 @@
 	LinkedList
 	ArrayList  		
 
-	不可变集合
+ 	不可变集合  同步集合
 	immutitabl
 	synchronizedMap / List
 
