@@ -1,0 +1,13 @@
+spring aop 分析
+	分析入口:
+	org.springframework.aop.config.AopNamespaceHandler
+	refresh -ConfigurableListableBeanFactory beanFactory = obtainFreshBeanFactory(); //在实例化的时候去执行加载handlers 然后执行resolve 方法
+	org.springframework.beans.factory.xml.DefaultNamespaceHandlerResolver#resolve
+	-->  Class<?> handlerClass = ClassUtils.forName(className, this.classLoader); //加载 org.springframework.context.config.ContextNamespaceHandler
+
+	只分析aop
+	-->AopNamespaceHandler
+		--> config 
+		--> aspectj-autoproxy 
+		--> scoped-proxy  
+		--> spring-configured 
