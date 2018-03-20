@@ -26,3 +26,8 @@
 	LinkedTransferQueue (java.util.concurrent) 无界的阻塞队列LinkedTransferQueue  等到拿走才放 无锁
 	SynchronousQueue (java.util.concurrent)
 	BlockingDeque (java.util.concurrent)
+
+
+Delay 使用场景
+1. 淘宝订单业务:下单之后如果三十分钟之内没有付款就自动取消订单。 
+2. 饿了吗订餐通知:下单成功后60s之后给用户发送短信通知。
