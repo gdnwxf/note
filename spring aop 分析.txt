@@ -13,3 +13,55 @@ spring aop 分析
 		--> spring-configured 
 
 	Advisor 的设计
+
+	https://www.cnblogs.com/zhaozihan/p/5953063.html
+
+    重要方法分析
+    引入了 aopalliance 基础interface
+    	<重要类>        MethodInterceptor  Advice
+    	<重要方法>      org.aopalliance.intercept.MethodInterceptor#invoke
+
+    Advice 的子类和 一些接口 <aopalliance包> <aspectj>
+    		Interceptor 										(org.aopalliance.intercept)
+				MethodInterceptor 								(org.aopalliance.intercept)
+				ConstructorInterceptor 							(org.aopalliance.intercept)
+			BeforeAdvice 										(org.springframework.aop)
+				MethodBeforeAdvice 								(org.springframework.aop)
+			DynamicIntroductionAdvice 							(org.springframework.aop)
+				IntroductionInterceptor 						(org.springframework.aop)
+			AbstractAspectJAdvice 								(org.springframework.aop.aspectj)
+				AspectJAfterAdvice 								(org.springframework.aop.aspectj)
+				AspectJAfterReturningAdvice 					(org.springframework.aop.aspectj)
+				AspectJAroundAdvice 							(org.springframework.aop.aspectj)
+				AspectJAfterThrowingAdvice 						(org.springframework.aop.aspectj)
+				AspectJMethodBeforeAdvice 						(org.springframework.aop.aspectj)
+			AfterAdvice 										(org.springframework.aop)
+				AfterReturningAdviceInterceptor 				(org.springframework.aop.framework.adapter)
+				ThrowsAdvice 									(org.springframework.aop)
+				AspectJAfterAdvice 								(org.springframework.aop.aspectj)
+				AspectJAfterReturningAdvice 					(org.springframework.aop.aspectj)
+				AspectJAfterThrowingAdvice 						(org.springframework.aop.aspectj)
+				ThrowsAdviceInterceptor 						(org.springframework.aop.framework.adapter)
+				AfterReturningAdvice 							(org.springframework.aop)			
+    
+    pointcut 
+    	ControlFlowPointcut 																    (org.springframework.aop.support)
+		ComposablePointcut 																		(org.springframework.aop.support)
+		DynamicMethodMatcherPointcut 															(org.springframework.aop.support)
+			PerTargetInstantiationModelPointcut in InstantiationModelAwarePointcutAdvisorImpl 	(org.springframework.aop.aspectj.annotation)
+		ExpressionPointcut 																		(org.springframework.aop.support)
+			AbstractExpressionPointcut 															(org.springframework.aop.support)
+		AspectJExpressionPointcut 																(org.springframework.aop.aspectj)
+		TruePointcut 																			(org.springframework.aop)
+		AnnotationMatchingPointcut 																(org.springframework.aop.support.annotation)
+		StaticMethodMatcherPointcut 															(org.springframework.aop.support)
+			StaticMethodMatcherPointcutAdvisor 													(org.springframework.aop.support)
+			TransactionAttributeSourcePointcut 													(org.springframework.transaction.interceptor)
+			SetterPointcut in Pointcuts 														(org.springframework.aop.support)
+			JCacheOperationSourcePointcut 														(org.springframework.cache.jcache.interceptor)
+			CacheOperationSourcePointcut 														(org.springframework.cache.interceptor)
+			GetterPointcut in Pointcuts 														(org.springframework.aop.support)
+			AbstractRegexpMethodPointcut 														(org.springframework.aop.support)
+			NameMatchMethodPointcut 															(org.springframework.aop.support)
+	<AOP中的切面封装了增强（Advice）和切点（Pointcut）>
+	
