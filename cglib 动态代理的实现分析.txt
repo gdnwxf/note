@@ -1,0 +1,14 @@
+cglib 动态代理的实现分析
+
+代理类继承自org.springframework.cglib.proxy.MethodInterceptor  实现intercept方法
+关键代码 :: 	
+	Enhancer enhancer = new Enhancer();
+    enhancer.setSuperclass(this.target.getClass()); // 将接口直接设置成BookFacadeProxyCglib 实现类
+    // 回调方法 
+    // enhancer.setCallbackType(this.getClass()); 
+    enhancer.setCallback(this);     //设置回调
+    // 创建代理对象
+    return enhancer.create();  
+    --> return this.createHelper(); 
+    	-->  this.setNamePrefix(this.superclass.getName());设置NamePrefix 
+    	--> return super.create(KEY_FACTORY.newInstance(this.superclass != null ? this.superclass.getName() : null, ReflectUtils.getNames(this.interfaces), this.filter, this.callbackTypes, this.useFactory, this.interceptDuringConstruction, this.serialVersionUID));
