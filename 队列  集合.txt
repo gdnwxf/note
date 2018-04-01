@@ -24,7 +24,7 @@
 	PriorityBlockingQueue (java.util.concurrent)  优先级队列 涉及到堆排序算法 PriorityQueue
 	LinkedBlockingQueue (java.util.concurrent)
 	LinkedTransferQueue (java.util.concurrent) 无界的阻塞队列LinkedTransferQueue  等到拿走才放 无锁
-	SynchronousQueue (java.util.concurrent)
+	SynchronousQueue (java.util.concurrent)   队尾匹配队头出队，先进先出，体现公平原则。(实现线程一对一通信)
 	BlockingDeque (java.util.concurrent)
 
 

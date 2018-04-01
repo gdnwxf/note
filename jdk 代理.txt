@@ -1,0 +1,52 @@
+jdk 代理
+rem  target 实例化的对象
+
+--> Proxy.newProxyInstance(target.getClass().getClassLoader(), target.getClass().getInterfaces(), this);
+	--> Class<?> cl = getProxyClass0(loader, intfs);  // intfs 对象接口
+	重点 :
+		--> return proxyClassCache.get(loader, interfaces);  // proxyClassCache 缓存
+			-->  Object subKey = Objects.requireNonNull(subKeyFactory.apply(key, parameter)); // 获取subkey   [KeyFactory类型] subKeyFactory
+				--> Supplier<V> supplier = valuesMap.get(subKey); value 域  <ProxyClassFactory> 类型  supplier.apply() == ProxyClassFactory.apply()
+				 		--> Map<Class<?>, Boolean> interfaceSet = new IdentityHashMap<>(interfaces.length);
+				 			//Verify that the class loader resolves the name of this interface to the same Class object.
+				 			//Verify that the Class object actually represents an interface.
+				 			//Verify that this interface is not a duplicate.
+				 		--> interfaceClass = Class.forName(intf.getName(), false, loader);  // 逐个遍历 interfaces  
+				 		--> long num = nextUniqueNumber.getAndIncrement();
+            			--> String proxyName = proxyPkg + proxyClassNamePrefix + num; //生成名称
+            			--> byte[] proxyClassFile = ProxyGenerator.generateProxyClass( proxyName, interfaces, accessFlags); // 生成classbyte  [核心]
+            			--> return defineClass0(loader, proxyName,  proxyClassFile, 0, proxyClassFile.length); //定义类
+				--> factory = new Factory(key, parameter, subKey, valuesMap);// valueFactory 即 valuesMap 中 value 的封装          			
+	--> final Constructor<?> cons = cl.getConstructor(constructorParams);
+    --> final InvocationHandler ih = h;
+    --> return cons.newInstance(new Object[]{h});
+
+
+
+   --------------------------------------------
+   生成$Proxy0 class 反编译
+
+    static {
+        try {
+            m1 = Class.forName("java.lang.Object").getMethod("equals", Class.forName("java.lang.Object"));
+            m2 = Class.forName("java.lang.Object").getMethod("toString");
+            m3 = Class.forName("BookFacade").getMethod("addBook");
+            m0 = Class.forName("java.lang.Object").getMethod("hashCode");
+        } catch (NoSuchMethodException var2) {
+            throw new NoSuchMethodError(var2.getMessage());
+        } catch (ClassNotFoundException var3) {
+            throw new NoClassDefFoundError(var3.getMessage());
+        }
+    }
+    生成的方法
+      public final void addBook() throws  {
+        try {
+            super.h.invoke(this, m3, (Object[])null);
+        } catch (RuntimeException | Error var2) {
+            throw var2;
+        } catch (Throwable var3) {
+            throw new UndeclaredThrowableException(var3);
+        }
+    }
+
+   jdk proxy的调用是一个反射调用的过程
