@@ -1,5 +1,7 @@
 cglib 动态代理的实现分析
 
+
+
 代理类继承自org.springframework.cglib.proxy.MethodInterceptor  实现intercept方法
 关键代码 :: 	
 	Enhancer enhancer = new Enhancer();
@@ -12,3 +14,167 @@ cglib 动态代理的实现分析
     --> return this.createHelper(); 
     	-->  this.setNamePrefix(this.superclass.getName());设置NamePrefix 
     	--> return super.create(KEY_FACTORY.newInstance(this.superclass != null ? this.superclass.getName() : null, ReflectUtils.getNames(this.interfaces), this.filter, this.callbackTypes, this.useFactory, this.interceptDuringConstruction, this.serialVersionUID));
+
+
+    // 代理产生的几个类
+
+    fastclass        --> public class BookFacadeImpl$$EnhancerByCGLIB$$677aba98$$FastClassByCGLIB$$dcb5b9cc extends FastClass 
+    class            --> public class BookFacadeImpl$$EnhancerByCGLIB$$677aba98 extends BookFacadeImpl implements Factory 
+    keyFactory       --> public class Enhancer$EnhancerKey$$KeyFactoryByCGLIB$$4ce19e8f extends KeyFactory implements EnhancerKey 
+    methodwrapperkey --> public class MethodWrapper$MethodWrapperKey$$KeyFactoryByCGLIB$$552be97a extends KeyFactory implements MethodWrapperKey  
+
+    调用路径
+    //使用的是这个对象
+    --> BookFacadeImpl$$EnhancerByCGLIB$$677aba98 
+        |    private boolean CGLIB$BOUND;
+        |    private static final ThreadLocal CGLIB$THREAD_CALLBACKS;  //threadlocal 中存放callback
+        |    private static final Callback[] CGLIB$STATIC_CALLBACKS;   // static callback
+        |    private MethodInterceptor CGLIB$CALLBACK_0;               // 用户自己实现的MethodInterceptor
+        |    private static final Method CGLIB$addBook$0$Method;       // 父类中的callback 方法
+        |    private static final MethodProxy CGLIB$addBook$0$Proxy;   // 方法代理 MethodProxy 类
+        |    private static final Object[] CGLIB$emptyArgs;            // 方法参数
+        |    private static final Method CGLIB$finalize$1$Method;
+        |    private static final MethodProxy CGLIB$finalize$1$Proxy;
+        |    private static final Method CGLIB$equals$2$Method;
+        |    private static final MethodProxy CGLIB$equals$2$Proxy;
+        |    private static final Method CGLIB$toString$3$Method;
+        |    private static final MethodProxy CGLIB$toString$3$Proxy;
+        |    private static final Method CGLIB$hashCode$4$Method;
+        |    private static final MethodProxy CGLIB$hashCode$4$Proxy;
+        |    private static final Method CGLIB$clone$5$Method;
+        |    private static final MethodProxy CGLIB$clone$5$Proxy;
+        |    
+        |    static void CGLIB$STATICHOOK1() {
+        |        CGLIB$THREAD_CALLBACKS = new ThreadLocal();
+        |        CGLIB$emptyArgs = new Object[0];
+        |        Class var0 = Class.forName("BookFacadeImpl$$EnhancerByCGLIB$$677aba98"); //当前类的实例
+        |        Class var1;
+        |        Method[] var10000 = ReflectUtils.findMethods(new String[]{"finalize", "()V", "equals", "(Ljava/lang/Object;)Z", "toString", "()Ljava/lang/String;", "hashCode", "()I", "clone", "()Ljava/lang/Object;"}, (var1 = Class.forName("java.lang.Object")).getDeclaredMethods());
+        |        CGLIB$finalize$1$Method = var10000[0];
+        |        CGLIB$finalize$1$Proxy = MethodProxy.create(var1, var0, "()V", "finalize", "CGLIB$finalize$1");
+        |        CGLIB$equals$2$Method = var10000[1];
+        |        CGLIB$equals$2$Proxy = MethodProxy.create(var1, var0, "(Ljava/lang/Object;)Z", "equals", "CGLIB$equals$2");
+        |        CGLIB$toString$3$Method = var10000[2];
+        |        CGLIB$toString$3$Proxy = MethodProxy.create(var1, var0, "()Ljava/lang/String;", "toString", "CGLIB$toString$3");
+        |        CGLIB$hashCode$4$Method = var10000[3];
+        |        CGLIB$hashCode$4$Proxy = MethodProxy.create(var1, var0, "()I", "hashCode", "CGLIB$hashCode$4");
+        |        CGLIB$clone$5$Method = var10000[4];
+        |        CGLIB$clone$5$Proxy = MethodProxy.create(var1, var0, "()Ljava/lang/Object;", "clone", "CGLIB$clone$5");
+                 // var1 赋值
+        |        CGLIB$addBook$0$Method = ReflectUtils.findMethods(new String[]{"addBook", "()V"}, (var1 = Class.forName("BookFacadeImpl")).getDeclaredMethods())[0];
+        |        CGLIB$addBook$0$Proxy = MethodProxy.create(var1, var0, "()V", "addBook", "CGLIB$addBook$0");
+        |    }
+    --> addBook()
+        --> 
+            -->| public final void addBook() {
+            -->|     MethodInterceptor var10000 = this.CGLIB$CALLBACK_0;//获取当前类中的methodintercepter
+            -->|     if (this.CGLIB$CALLBACK_0 == null) {
+            -->|         CGLIB$BIND_CALLBACKS(this);                //如果为空
+            -->|         var10000 = this.CGLIB$CALLBACK_0;
+            -->|     }
+            -->| 
+            -->|     if (var10000 != null) {
+                         // 执行MethodInterceptor 类中的方法 <实现了MethodInterceptor的类> -->  
+            -->|         var10000.intercept(this, CGLIB$addBook$0$Method, CGLIB$emptyArgs, CGLIB$addBook$0$Proxy); 
+            -->|     } else {
+            -->|         super.addBook();
+            -->|     }
+            -->| }
+
+            -->| private static final void CGLIB$BIND_CALLBACKS(Object var0) {
+            -->|     BookFacadeImpl$$EnhancerByCGLIB$$677aba98 var1 = (BookFacadeImpl$$EnhancerByCGLIB$$677aba98)var0;
+            -->|     if (!var1.CGLIB$BOUND) {
+            -->|         var1.CGLIB$BOUND = true;
+            -->|         Object var10000 = CGLIB$THREAD_CALLBACKS.get();
+            -->|         if (var10000 == null) {
+            -->|             var10000 = CGLIB$STATIC_CALLBACKS;
+            -->|             if (CGLIB$STATIC_CALLBACKS == null) {
+            -->|                 return;
+            -->|             }
+            -->|        }
+            -->|        
+            -->|         var1.CGLIB$CALLBACK_0 = (MethodInterceptor)((Callback[])var10000)[0];
+            -->|     }
+            -->|     
+            -->| }
+
+            实现了 MethodInterceptor的类
+            -->|>|public class BookFacadeProxyCglib implements MethodInterceptor {
+            -->|>|    private Object target;
+            -->|>|
+            -->|>|    public Object getInstance(Object target) {
+            -->|>|        this.target = target;
+            -->|>|        Enhancer enhancer = new Enhancer();
+            -->|>|        enhancer.setSuperclass(this.target.getClass());
+            -->|>|        // 回调方法
+            -->|>|        // enhancer.setCallbackType(this.getClass());
+            -->|>|        enhancer.setCallback(this);
+            -->|>|        // 创建代理对象
+            -->|>|        return enhancer.create();
+            -->|>|    }
+            -->|>|    
+            -->|>|    @Override
+            -->|>|    public Object intercept(Object obj, Method method, Object[] args, MethodProxy proxy) throws Throwable {
+            -->|>|        System.out.println("before run!");
+                          // 执行MethodProxy的invokeSuper
+            -->|>|        proxy.invokeSuper(obj, args);
+            -->|>|        System.out.println("after run!");
+            -->|>|        return null;
+            -->|>|    }
+            -->|>|}
+
+            MethodProxy的invokeSuper 方法
+            -->| public Object invokeSuper(Object obj, Object[] args) throws Throwable {
+            -->|     try {
+            -->|         this.init();
+
+                        ------> | private void init() {
+                        ------> |     if (this.fastClassInfo == null) {
+                        ------> |         Object var1 = this.initLock;
+                        ------> |         synchronized(this.initLock) {
+                        ------> |             if (this.fastClassInfo == null) {
+                        ------> |                 MethodProxy.CreateInfo ci = this.createInfo;
+                        ----------------------- 对应  --> CGLIB$addBook$0$Proxy = MethodProxy.create(var1, var0, "()V", "addBook", "CGLIB$addBook$0");
+                        MethodProxy 中的变量赋值
+                        [ c1 = var1 = BookFacadeImpl                            ]  
+                        [ c2 = var0 = BookFacadeImpl$$EnhancerByCGLIB$$677aba98 ]
+                        [ name1 = addBook         = new Signature(name1, desc); ]
+                        [ name2 = CGLIB$addBook$0 = new Signature(name2, desc); ]
+                                            --> | public static MethodProxy create(Class c1, Class c2, String desc, String name1, String name2) {
+                                            --> |     MethodProxy proxy = new MethodProxy();
+                                            --> |     proxy.sig1 = new Signature(name1, desc);
+                                            --> |     proxy.sig2 = new Signature(name2, desc);
+                                            --> |     proxy.createInfo = new MethodProxy.CreateInfo(c1, c2);
+                                            --> |     return proxy;
+                                            --> | }
+                        -----------------------
+                        ------> |                 MethodProxy.FastClassInfo fci = new MethodProxy.FastClassInfo(); //实例化FastClassInfo
+                        ------> |                 fci.f1 = helper(ci, ci.c1);
+                        ----------------------------------------------------------------------------------------------------------------------
+                                                    ---->| private static FastClass helper(MethodProxy.CreateInfo ci, Class type) {
+                                                    ---->|    Generator g = new Generator();
+                                                    ---->|    g.setType(type);
+                                                    ---->|    g.setClassLoader(ci.c2.getClassLoader());
+                                                    ---->|    g.setNamingPolicy(ci.namingPolicy);
+                                                    ---->|    g.setStrategy(ci.strategy);
+                                                    ---->|    g.setAttemptLoad(ci.attemptLoad);
+                                                    ---->|    return g.create();
+                                                             >| org.springframework.cglib.core.AbstractClassGenerator#create //最终调用AbstractClassGenerator的create方法
+                                                    ---->|   }
+                        ----------------------------------------------------------------------------------------------------------------------
+                        ------> |                 fci.f2 = helper(ci, ci.c2);
+                        ------> |                 fci.i1 = fci.f1.getIndex(this.sig1);
+                        ------> |                 fci.i2 = fci.f2.getIndex(this.sig2);
+                        ------> |                 this.fastClassInfo = fci;
+                        ------> |                 this.createInfo = null;
+                        ------> |             }
+                        ------> |         }
+                        ------> |     }
+                        ------> | }
+            -->|         MethodProxy.FastClassInfo fci = this.fastClassInfo;
+            -->|         return fci.f2.invoke(fci.i2, obj, args);
+            -->|     } catch (InvocationTargetException var4) {
+            -->|         throw var4.getTargetException();
+            -->|     }
+            -->| }
+
