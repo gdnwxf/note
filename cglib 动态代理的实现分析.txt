@@ -23,6 +23,16 @@ cglib 动态代理的实现分析
     keyFactory       --> public class Enhancer$EnhancerKey$$KeyFactoryByCGLIB$$4ce19e8f extends KeyFactory implements EnhancerKey 
     methodwrapperkey --> public class MethodWrapper$MethodWrapperKey$$KeyFactoryByCGLIB$$552be97a extends KeyFactory implements MethodWrapperKey  
 
+    整个aop执行过程 
+    [ BookFacadeImpl$$EnhancerByCGLIB$$677aba98 ] addbook 
+    --> [ MethodIntercepter.intercept ] 
+    < before method exe >
+    --> [ BookFacadeImpl$$EnhancerByCGLIB$$677aba98$$FastClassByCGLIB$$dcb5b9cc.invoke ]
+    --> [ BookFacadeImpl$$EnhancerByCGLIB$$677aba98.CGLIB$addBook$0  >>>> (final 方法) ]
+    --> [ super[BookFacadeImpl].addBook ]
+    < after method exe >
+    --> [ MethodIntercepter.intercept ] 
+
     调用路径
     //使用的是这个对象
     --> BookFacadeImpl$$EnhancerByCGLIB$$677aba98 
