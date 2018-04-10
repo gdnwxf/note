@@ -54,6 +54,6 @@ select poll epoll
 
 参考 
 	[ 初始参考 ] https://blog.csdn.net/u013679744/article/details/79188768
-    [ 同步/异步 ] https://blog.csdn.net/scucscheng/article/details/51940552
+    [ 同步/异步/代码演示 ] https://blog.csdn.net/scucscheng/article/details/51940552
 	[ 代码验证 ] https://www.cnblogs.com/lojunren/p/3856290.html
 	[ 深入内核 ] http://blog.chinaunix.net/uid-28541347-id-4273856.html
