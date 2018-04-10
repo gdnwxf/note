@@ -32,8 +32,9 @@ select poll epoll
 		(5) ep_send_events函数（很关键），它扫描txlist中的每个epitem，调用其关联fd对应的poll方法（图中蓝线）。
 			此时对poll的调用仅仅是取得fd上较新的events（防止之前events被更新），
 			之后将取得的events和相应的fd发送到用户空间（封装在struct epoll_event，从epoll_wait返回）。
-			之后如果这个epitem对应的fd是LT模式监听且取得的events是用户所关心的，则将其重新加入回rdlist（图中蓝线），否则（ET模式）不在加入rdlist。
-		http://blog.chinaunix.net/uid-28541347-id-4273856.html
+			之后如果这个epitem对应的fd是LT模式监听且取得的events是用户所关心的，[ 则将其重新加入回rdlist（图中蓝线），否则（ET模式）不在加入rdlist。]
+		http://blog.chinaunix.net/uid-28541347-id-4273856.html 
+		https://www.cnblogs.com/lojunren/p/3856290.html
 	________________________________________________________________________________
 	操作方法
 		EPOLL_CTL_ADD 	//新增
@@ -51,6 +52,9 @@ select poll epoll
 	 	epoll并不是在所有的应用场景都会比select和poll高很多。
 	 	尤其是当活动连接比较多的时候，回调函数被触发得过于频繁的时候，epoll的效率也会受到显著影响！
 	 	所以，epoll特别适用于连接数量多，但活动连接较少的情况。
+
+
+
 
 参考 
 	[ 初始参考 ] https://blog.csdn.net/u013679744/article/details/79188768
