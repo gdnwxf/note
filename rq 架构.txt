@@ -1,0 +1,5 @@
+rq 架构
+	namesvr 无状态服务 集群节点无数据同步
+	broker master slave BrokerId=0表示Master，非0表示Slave。Master也可以部署多个。
+	每个Broker与NameServer集群中的所有节点建立长连接，定时注册Topic信息到所有NameServer。
+	broker 智能读
