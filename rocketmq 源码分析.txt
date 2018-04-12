@@ -4,13 +4,60 @@ rocketmq 源码分析
 	http://hawtio-prome-prod.cloudapps.2dfire-pre.com/hawtio/jmx/attributes?main-tab=jmx#%2Fjvm%2Fconnect%3Fmain-tab=jvm
 	https://blog.csdn.net/iie_libi/article/details/54236502
 	https://blog.csdn.net/chunlongyu/article/category/6638499
+
+	为什么RocketMQ要去除ZK依赖？
+		https://blog.csdn.net/chunlongyu/article/details/54018010
+	阿里中间件团队
+		http://jm.taobao.org/categories/%E6%B6%88%E6%81%AF%E4%B8%AD%E9%97%B4%E4%BB%B6/
+	Broker与NameServer心跳机制
+		https://blog.csdn.net/chunlongyu/article/details/54380626
+	Consumer负载均衡与Kafka的Consumer负载均衡之不同点
+		https://blog.csdn.net/chunlongyu/article/details/54630651
+	CommitLog与ConsumeQueue
+		https://blog.csdn.net/chunlongyu/article/details/54576649
+	Consumer负载均衡机制 -- Rebalance
+		https://blog.csdn.net/chunlongyu/article/details/54585232
+	Topic路由数据结构解析 -- topicRoute与topicPublishInfo与queueId
+		https://blog.csdn.net/chunlongyu/article/details/54376920
+	//roketmq 查询命令
+		https://www.cnblogs.com/gmq-sh/p/6232633.html  
+	//rocketmq原理：name server ，broker， producer， consumer之间通信
+		https://blog.csdn.net/iie_libi/article/details/54236502
+	//mq 总体简介
+		http://www.tianshouzhi.com/api/tutorials/rocketmq
+
+	pull 模式 和 push模式
+		pull 
+			** MQPullConsumerScheduleService 内部比我们实现了负载均衡
+			** DefaultMQPullConsumer 则需要自己实现负载均衡
+			Pull的负载均衡
+			在MQPullConsumer这个类里面，有一个MessageQueueListener，它的目的就是当queue发生变化的时候，通知Consumer。也正是这个借口，帮助我们在Pull模式里面，实现负载均衡。
+			// reblance 由 
+			有了这个Listener，我们就可以动态的知道当前的Consumer分摊到了几个MessageQueue。然后对这些MessageQueue，我们可以开个线程池来消费。
+		push
+			DefaultMQPushConsumer 推送模式
+	namesvr 的作用
+		NameServer维护了一份Broker的地址列表和，broker在启动的时候会去NameServer进行注册，会维护Broker的存活状态.
+		NameServer维护了一份Topic和Topic对应队列的地址列表,broker每次发送心跳过来的时候都会把Topic信息带上
+	NameSrv监测Broker的死亡
+		机制之一：监测连接断掉
+		机制之二：心跳
+			每个Broker会每隔30s向NameSrv更新自身topic信息
+			NameServer收到RegisterBroker信息，更新自己的brokerLiveTable结构
+			然后NameServer会每10s，扫描一次这个结构。如果发现上次更新时间距离当前时间超过了BROKER_CHANNEL_EXPIRED_TIME = 1000 * 60 * 2（2分钟)，则认为此broker死亡。
+	Producer/Consumer如何得知Broker死亡
+		当某个Broker死亡之后，NameSrv并不会主动通知Producer和Consumer。
+		而是Producer/Consumer周期性的去NameSrv取。
+	reblance 负载均衡  // https://blog.csdn.net/chunlongyu/article/details/54630651  客户端每隔20s做一次更新
+		要做负载均衡，首先要解决的一个问题就是收集信息。所谓收集信息，就是我得知道每一个consumer group都有哪些consumer，对应的topic是谁？
+		这样一份全局的信息，
+		是存放在Broker，
+		还是NameServer上面呢？
+		RocketMQ选择了存放在Broker上面。具体做法是：客户端会通过心跳消息，不停的上报自己，RegisterConsumer。 //  放到了ConsumerManager currentHashMap< String/* Group */,ConsumerGroupInfo>
+
 	
-	https://www.cnblogs.com/gmq-sh/p/6232633.html  //roketmq 查询命令
-	
-	// rocketmq原理：name server ，broker， producer， consumer之间通信
-	https://blog.csdn.net/iie_libi/article/details/54236502
-	
- 
+ 供销比
+
 工程 broker 
 依赖项目的  common(通用工具) store (存储) remoting   client(与客户端的链接) srvutil(服务工具)  filter
 入口主类 BrokerStartup
