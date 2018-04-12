@@ -1,4 +1,15 @@
 rocketmq 源码分析
+
+-------------------------------------------------
+	http://hawtio-prome-prod.cloudapps.2dfire-pre.com/hawtio/jmx/attributes?main-tab=jmx#%2Fjvm%2Fconnect%3Fmain-tab=jvm
+	https://blog.csdn.net/iie_libi/article/details/54236502
+	https://blog.csdn.net/chunlongyu/article/category/6638499
+	
+	https://www.cnblogs.com/gmq-sh/p/6232633.html  //roketmq 查询命令
+	
+	// rocketmq原理：name server ，broker， producer， consumer之间通信
+	https://blog.csdn.net/iie_libi/article/details/54236502
+	
  
 工程 broker 
 依赖项目的  common(通用工具) store (存储) remoting   client(与客户端的链接) srvutil(服务工具)  filter
