@@ -27,7 +27,8 @@ rocketmq 源码分析
 		http://www.tianshouzhi.com/api/tutorials/rocketmq
 
 	pull 模式 和 push模式
-		pull 
+		pull 拉消息策略  pull -> 本地ProcessQueue  TreeMap<Long, MessageExt> msgTreeMap = new TreeMap<Long, MessageExt>();
+									-> 消息处理 解耦
 			** MQPullConsumerScheduleService 内部比我们实现了负载均衡
 			** DefaultMQPullConsumer 则需要自己实现负载均衡
 			Pull的负载均衡
