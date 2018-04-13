@@ -16,7 +16,7 @@ https://docs.oracle.com/javase/8/docs/technotes/tools/unix/java.html#BGBCIEFC
 -XX:+UseG1GC                                                 //g1 垃圾回收器                                                    	                    
 -XX:G1HeapRegionSize=16m                                     //region Size                                                    	                    
 -XX:G1ReservePercent=25                                      //老年代提供保留的晋升空间                                                    	                    
--XX:MaxTenuringThreshold=15                                  //新生代中最大年龄                                                   	                    
+-XX:MaxTenuringThreshold=15                                  //新生代中晋升到老年代的最大年龄                                                   	                    
 -XX:SurvivorRatio=8                                          //eden : survivor                                                   	                    
 -XX:+ParallelRefProcEnabled                                  //并行处理java.lang.Ref.* instances                                                   	                    
 -XX:-OmitStackTraceInFastThrow                               //更好的跟踪栈信息                                                   	                    
