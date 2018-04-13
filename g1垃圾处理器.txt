@@ -25,7 +25,7 @@ https://docs.oracle.com/javase/8/docs/technotes/tools/unix/java.html#BGBCIEFC
 -XX:+PrintGCApplicationStoppedTime                           //打印应用在gc期间暂停的时间                                                   	                    
 -verbose:gc                                                  //                                                    	                    
 -XX:+PrintGCDetails                                          //打印gc详情                                                   	                    
--XX:+PrintHeapAtGC                                           //                                                    	                    
+-XX:+PrintHeapAtGC                                           //打印heap的信息 < 官网没有查到此参数 >                                                    	                    
 -XX:+PrintGCDateStamps                                       //打印gc时间戳                                                   	                    
 -XX:+PrintPromotionFailure                                   //打印晋升失败                                                    	                    
 -XX:+HeapDumpOnOutOfMemoryError                              //oo 时候heap dump                                                   	                    
