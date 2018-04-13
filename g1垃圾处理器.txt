@@ -1,0 +1,55 @@
+Java9 g1 垃圾处理器详细解释
+https://docs.oracle.com/javase/9/gctuning/garbage-first-garbage-collector-tuning.htm#JSGCT-GUID-2428DA90-B93D-48E6-B336-A849ADF1C552
+jvm参数详解
+http://www.oracle.com/technetwork/articles/java/vmoptions-jsp-140102.html
+jvm8 官方参数说明
+https://docs.oracle.com/javase/8/docs/technotes/tools/unix/java.html#BGBCIEFC
+
+
+--exec                                                       //                                                    	                    
+-Xmx4428m                                                    //最大值                                                    	                    
+-Xms4428m                                                    //最小值                                                    	                    
+-Xmn2767m                                                    //新生代                                                   	                    
+-Xss256k                                                     //线程栈大小                                                    	                    
+-XX:MetaspaceSize=256m                                       //元数据                                                    	                    
+-XX:MaxMetaspaceSize=512m                                    //最大元数据                                                    	                    
+-XX:+UseG1GC                                                 //g1 垃圾回收器                                                    	                    
+-XX:G1HeapRegionSize=16m                                     //region Size                                                    	                    
+-XX:G1ReservePercent=25                                      //老年代提供保留的晋升空间                                                    	                    
+-XX:MaxTenuringThreshold=15                                  //新生代中最大年龄                                                   	                    
+-XX:SurvivorRatio=8                                          //eden : survivor                                                   	                    
+-XX:+ParallelRefProcEnabled                                  //并行处理java.lang.Ref.* instances                                                   	                    
+-XX:-OmitStackTraceInFastThrow                               //更好的跟踪栈信息                                                   	                    
+-XX:+AlwaysPreTouch                                          //总是堆清零                                                   	                    
+-XX:+PrintTenuringDistribution                               //打印转换到老年代的信息                                                   	                    
+-XX:+PrintGCApplicationStoppedTime                           //打印应用在gc期间暂停的时间                                                   	                    
+-verbose:gc                                                  //                                                    	                    
+-XX:+PrintGCDetails                                          //打印gc详情                                                   	                    
+-XX:+PrintHeapAtGC                                           //                                                    	                    
+-XX:+PrintGCDateStamps                                       //打印gc时间戳                                                   	                    
+-XX:+PrintPromotionFailure                                   //打印晋升失败                                                    	                    
+-XX:+HeapDumpOnOutOfMemoryError                              //oo 时候heap dump                                                   	                    
+-XX:+PrintAdaptiveSizePolicy                                 //打印自适应调整堆的信息                                                    	                    
+-XX:+UseGCLogFileRotation                                    //Xloggc rotation                                                    	                    
+-XX:NumberOfGCLogFiles=5                                     //gclog的最大文件数量                                                   	                    
+-XX:GCLogFileSize=30M                                        //gc日志文件大小                                                   	                    
+-Xloggc:/opt/logs/jetty/gc_%p.log                            //gc日志路径                                                   	                    
+-XX:HeapDumpPath=/opt/logs/jetty/java.hprof                  //dump内存路径                                                   	                    
+-XX:ErrorFile=/opt/logs/jetty/hs_err_pid%p.log               //Error 错误日志文件                                                   	                    
+-Dcom.sun.management.jmxremote.port=1099                     //MX 端口                                                    	                    
+-Djava.rmi.server.hostname=localhost                         //远程host                                                    	                    
+-Dcom.sun.management.jmxremote                               //                                                    	                    
+-Dcom.sun.management.jmxremote.ssl=false                     //                                                    	                    
+-Dcom.sun.management.jmxremote.authenticate=false            //                                                    	                    
+-Dorg.eclipse.jetty.util.URI.charset=UTF-8                   //URI 编码                                                  	                    
+-Dorg.eclipse.jetty.io.nio.BUSY_PAUSE=0                      //繁忙暂停                                                    	                    
+-Dsun.net.inetaddr.ttl=0                                     //                                                    	                    
+-Dlog4j.level=ERROR                                          //log4j日志级别                                                    	                    
+-Dlog4j.dir=/opt/logs/jetty                                  //                                                    	                    
+-Dlog.dir=/opt/logs/jetty                                    //日志目录                                                    	                    
+-Ddata.dir=/opt/data/jetty                                   //                                                    	                    
+-Dtmp.dir=/opt/tmp/jetty                                     //                                                    	                    
+-Dcache.dir=/opt/cache/jetty                                 //                                                    	                    
+-Drocketmq.client.log.loadconfig=false                       //rq 日志会影响应用的日志问题                                                    	                    
+-Dorg.eclipse.jetty.server.Request.maxFormContentSize=5000000//Form提交的最大值                                                   	                    
+-Dcom.rocketmq.sendMessageWithVIPChannel=false               //
