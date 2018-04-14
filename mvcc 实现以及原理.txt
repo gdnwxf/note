@@ -1,5 +1,6 @@
 mvcc 实现以及原理
 
+https://liuzhengyang.github.io/2017/04/18/innodb-mvcc/
 https://riverdba.github.io/2017/04/01/MVCC-theory-study/#%E4%BB%80%E4%B9%88%E6%98%AFredo
 
 	redo log用来保证事务的原子性和持久性；redo恢复提交事务修改的页操作；redo是物理日志，记录的是页的物理修改操作；redo存放在redo log文件中；
