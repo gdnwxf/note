@@ -61,3 +61,25 @@ reactor 模型启动
     		--> doDoubleCheckHeartBeat(); 检查delay的节点的心跳
     		--> scheduledExecutorService.scheduleAtFixedRate(new PerformanceDataSender(),x,x) 将收集到的信息发送到前端即 cobar-manager
 		
+
+
+调用链
+	 NIOAcceptor.run() 
+	 	-> accept(); 获取 SelectionKey
+	 		-> SocketChannel channel = serverChannel.accept(); 在selectkeys 中获取sc
+	 		-> FrontendConnection c = factory.make(channel);   实例化FC	
+	 		-> NIOProcessor processor = nextProcessor();	   Round-Robin 方式选则Processor
+	 		-> processor.postRegister(c);					   注册到Reactor 中去
+	 			-> 到NIOReactor 注册读事件
+	 				-> AbstractConnection.read
+	 					-> FrontendConnection.handle
+	 						-> FrontendAuthenticator.handle  	前段认证 校验用户等的信息
+	 						-> success(auth);					通过认证, 设置后端
+	 							-> source.setHandler(new FrontendCommandHandler(source));  注册回调  重新设置handler 为第二次读做准备, 处理MySQL 返回的读
+	 							-> source.write(source.writeToBuffer(AUTH_OK, buffer));    写入->
+	 								-> NIOReactor.R.write
+	 								-> AbstractConnection.writeByEvent 唤醒写事件
+	 								-> 
+
+
+
