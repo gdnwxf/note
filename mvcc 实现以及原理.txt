@@ -1,0 +1,35 @@
+mvcc 实现以及原理
+
+https://riverdba.github.io/2017/04/01/MVCC-theory-study/#%E4%BB%80%E4%B9%88%E6%98%AFredo
+
+	redo log用来保证事务的原子性和持久性；redo恢复提交事务修改的页操作；redo是物理日志，记录的是页的物理修改操作；redo存放在redo log文件中；
+	
+	undo log用来保证事务的一致性；undo回滚行记录到某个特定版本；undo是逻辑日志，根据每行记录进行记录；undo存放在共享表空间的undo段中；
+
+	在innodb中，undo log被划分成多个段，具体某行的undo log就保存在某个段中，称为回滚段。
+
+	row 行数的结构
+	rowid   事务id(DB_ROLL_PT)  回滚指针 id col1 col2 col3 col4 
+
+
+	insert 的时候 db_roll_pt 为null
+	update 的时候 原记录将被放入到undo表空间  通过 DB_ROLL_PTR指向该记录 
+
+ 	RR隔离级别下：在每个事务开始的时候，会将当前系统中的所有的活跃事务拷贝到一个列表中(read view)。
+	RC隔离级别下：在事务中的每个语句开始时，会将当前系统中的所有的活跃事务拷贝到一个列表中(read view) 。
+	然后按照以下逻辑判断事务的可见性：
+		开启事务的时候 吧当前系统中活动的事务的ID都拷贝到一个列表(read view)中 
+		这个列表中最早的事务Id 为tmin 最晚的事务id为tmax
+		当读到一行是,该行上当前事务id 为 tid_current ,
+
+		并不是用当前事务ID与表中各个数据行上的事务ID去比较的，而是在每个事务开始的时候，
+		会将当前系统中所有的活跃事务拷贝到read view列表，根据read view最早一个事务ID和最晚的一个事务ID做比较，
+		这样就能确保在当前事务之前没提交的所有事务的变更及后续新启动的事务的变更在当前事务中都是看不到的。当前事务自身的变更是可以看到的。
+
+	在rr隔离级别之上都有间隙锁
+	所以rc的间隙锁的概率低于rr的间隙所
+
+	read committed 读取被锁定行的最新一份快照数据
+	repeatable read 读取事务开始时的行数据版本
+
+
