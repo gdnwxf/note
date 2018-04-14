@@ -37,23 +37,27 @@ schame rute 等信息的配置
 								--> this.recorder = new HeartbeatRecorder(); 心跳记录信息 做统计使用的
 reactor 模型启动
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-	server.startup(); //启动服务
-	--> new NIOProcessor[system.getProcessors()]; 实例化NIOProcessor 线程池 启动processor 同时也是 实例化NIOReactor
-	--> processors[i].startup(); 启动处理线程
-	--> timer.schedule(processorCheck(), 0L, system.getProcessorCheckPeriod()); 定时执行该方法，回收部分资源
-	--> NIOConnector connector = new NIOConnector(NAME + "Connector");  启动connector 
-	--> connector.setProcessors(processors); // 设置实例化的处理器 [ selectionKey.attach(theObject); selectionKey 附加到某个键上]
-    --> connector.start(); //启动reactor 模型 
-    --> zookeeperManager = ZookeeperManager.getInstance(); 实例化zk client /cobar/{clusterName}/datasource 节点
-    --> listenAndDoSwitch(this.datasourceConf); 监听该节点下childEvent
-    --> for (MySQLDataNode node : dataNodes.values()) node.init(1, 0); //实例化每个节点
-    	--> this.initZookeeperData() //初始化分布式锁等ZK协调元数据  xxxxx/datasource/dataNode.name  xxxxx/lock/dataNode.name 
-    --> timer.schedule(dataNodeIdleCheck() x,x)数据节点定时连接空闲超时检查任务
-    --> timer.schedule(dataNodeHeartbeat() x,x)数据节点定时心跳任务
-    --> ManagerConnectionFactory mf = new ManagerConnectionFactory(); 实例化manager
-    --> ServerConnectionFactory sf = new ServerConnectionFactory(); 实例化ServerConnection
-    --> server = new NIOAcceptor(NAME + "Server", system.getServerPort(), sf);
-    --> server.start();
-    --> timer.schedule(clusterHeartbeat(),x,x) 
-    --> doDoubleCheckHeartBeat(); 检查delay的节点的心跳
-    --> scheduledExecutorService.scheduleAtFixedRate(new PerformanceDataSender(),x,x) 将收集到的信息发送到前端即 cobar-manager
+			server.startup(); //启动服务
+			--> new NIOProcessor[system.getProcessors()]; 实例化NIOProcessor 线程池 启动processor 同时也是 实例化NIOReactor
+			--> processors[i].startup(); 启动处理线程
+			--> timer.schedule(processorCheck(), 0L, system.getProcessorCheckPeriod()); 定时执行该方法，回收部分资源
+启动后端的connector---------------------------------------------------------------------------------------------------------------------------------  
+			--> NIOConnector connector = new NIOConnector(NAME + "Connector");  启动connector 
+			--> connector.setProcessors(processors); // 设置实例化的处理器 [ selectionKey.attach(theObject); selectionKey 附加到某个键上]
+    		--> connector.start(); //启动reactor 模型 
+启动zookeeper对后端节点的监听------------------------------------------------------------------------------------------------------------------------ 
+    		--> zookeeperManager = ZookeeperManager.getInstance(); 实例化zk client /cobar/{clusterName}/datasource 节点
+    		--> listenAndDoSwitch(this.datasourceConf); 监听该节点下childEvent
+    		--> for (MySQLDataNode node : dataNodes.values()) node.init(1, 0); //实例化每个节点
+    			--> this.initZookeeperData() //初始化分布式锁等ZK协调元数据  xxxxx/datasource/dataNode.name  xxxxx/lock/dataNode.name 
+    		--> timer.schedule(dataNodeIdleCheck() x,x)数据节点定时连接空闲超时检查任务
+    		--> timer.schedule(dataNodeHeartbeat() x,x)数据节点定时心跳任务
+启动前端front的链接的管理---------------------------------------------------------------------------------------------------------------------------------  
+    		--> ManagerConnectionFactory mf = new ManagerConnectionFactory(); 实例化manager
+    		--> ServerConnectionFactory sf = new ServerConnectionFactory(); 实例化ServerConnection
+    		--> server = new NIOAcceptor(NAME + "Server", system.getServerPort(), sf);
+    		--> server.start();
+    		--> timer.schedule(clusterHeartbeat(),x,x) 
+    		--> doDoubleCheckHeartBeat(); 检查delay的节点的心跳
+    		--> scheduledExecutorService.scheduleAtFixedRate(new PerformanceDataSender(),x,x) 将收集到的信息发送到前端即 cobar-manager
+		
