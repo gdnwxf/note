@@ -1,0 +1,76 @@
+ 线上cms的配置
+
+--exec																														
+-Xmx2155m-------------------------------------------------------//最大堆内存													
+-Xms2155m														//最小堆内存													
+-Xmn1347m														//新生代内存													
+-Xss256k														//线程栈的大小													
+-XX:MetaspaceSize=128m											//metaspacesize的大小															
+-XX:MaxMetaspaceSize=256m										//元数据区的最大值																
+-XX:+UseParallelOldGC											//使用并行oldgc																	
+-XX:-UseAdaptiveSizePolicy										//使用自适应策略																	
+-XX:+PrintAdaptiveSizePolicy									//打印策略																		
+-verbose:gc														//													
+-XX:+PrintGCDetails												//打印gc详情															
+-XX:+PrintHeapAtGC												//gc时打印堆信息															
+-XX:+PrintGCDateStamps											//打印时间戳																
+-XX:+PrintPromotionFailure										//打印晋升失败																	
+-XX:+HeapDumpOnOutOfMemoryError									//dunp when error																		
+-XX:+PrintAdaptiveSizePolicy									//																		
+-XX:+UseGCLogFileRotation										//循环打印日志 																
+-XX:NumberOfGCLogFiles=5										//gc文件数量																
+-XX:GCLogFileSize=30M											//gc文件大小																
+-Xloggc:/opt/logs/jetty/gc_%p.log								//																			
+-XX:HeapDumpPath=/opt/logs/jetty/java.hprof						//																					
+-XX:ErrorFile=/opt/logs/jetty/hs_err_pid%p.log					//																						
+-Dcom.sun.management.jmxremote.port=1099						//																					
+-Djava.rmi.server.hostname=localhost							//																				
+-Dcom.sun.management.jmxremote									//																		
+-Dcom.sun.management.jmxremote.ssl=false						//																					
+-Dcom.sun.management.jmxremote.authenticate=false				//																							
+-Dorg.eclipse.jetty.util.URI.charset=UTF-8						//																					
+-Dorg.eclipse.jetty.io.nio.BUSY_PAUSE=0							//																				
+-Dsun.net.inetaddr.ttl=0										//																	
+-Dlog4j.level=ERROR												//															
+-Dlog4j.dir=/opt/logs/jetty										//																	
+-Dlog.dir=/opt/logs/jetty										//																	
+-Ddata.dir=/opt/data/jetty										//																	
+-Dtmp.dir=/opt/tmp/jetty										//																	
+-Dcache.dir=/opt/cache/jetty									//	
+-Drocketmq.client.log.loadconfig=false							//			
+-Dorg.eclipse.jetty.server.Request.maxFormContentSize=5000000	//									
+-Dcom.rocketmq.sendMessageWithVIPChannel=false					//					
+-DKAFKA_ADDR=kafka1001.prod.2dfire.info:9092,kafka1002.prod.2dfire.info:9092,kafka1003.prod.2dfire.info:9092
+-javaagent:/opt/app/lib/agent-bond-agent-1.0.2-2dfire.jar=jolokia{{port=8778,host=0.0.0.0}},jmx_exporter{{8779:/opt/app/lib/config.yaml}}
+
+#-----------------------------------------------------------
+
+
+#===========================================================
+# Start classpath OPTIONS.
+# These control what classes are on the classpath
+# for a full listing do
+#   java -jar start.jar --list-options
+#-----------------------------------------------------------
+OPTIONS=Server,jsp,jmx,resources,websocket,ext,jta,plus,jdbc,annotations
+
+#-----------------------------------------------------------
+
+
+#===========================================================
+# Configuration files.
+# For a full list of available configuration files do
+#   java -jar start.jar --help
+#-----------------------------------------------------------
+#etc/jetty-jmx.xml
+etc/jetty.xml
+etc/jetty-hightide.xml
+# etc/jetty-ssl.xml
+# etc/jetty-requestlog.xml
+etc/jetty-deploy.xml
+etc/jetty-plus.xml
+etc/jetty-webapps.xml
+etc/jetty-contexts.xml
+etc/jetty-testrealm.xml
+etc/jetty-jaas.xml
+#===========================================================

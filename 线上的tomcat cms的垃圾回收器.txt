@@ -1,0 +1,85 @@
+线上的tomcat cms的垃圾回收器
+jdk-bugs
+https://bugs.java.com/
+ReduceInitialCardMarks
+http://sishuok.com/forum/blogPost/list/4969.html
+https://bugs.java.com/view_bug.do?bug_id=6896647
+
+JAVA_HOME="/usr/lib/jvm/jre"
+
+# Where your tomcat installation lives
+CATALINA_BASE="/usr/share/tomcat"
+CATALINA_HOME="/usr/share/tomcat"
+JASPER_HOME="/usr/share/tomcat"
+CATALINA_TMPDIR="/var/cache/tomcat/temp"
+CATALINA_LOGS="$CATALINA_HOME"/logs
+
+# You can pass some parameters to java here if you wish to
+#JAVA_OPTS="-Xminf0.1 -Xmaxf0.3"
+
+# Use JAVA_OPTS to set java.library.path for libtcnative.so
+#JAVA_OPTS="-Djava.library.path=/usr/lib"
+CATALINA_OPTS="															
+-Xmx4428m											//最大堆内存
+-Xms4428m											//最小堆内存
+-Xmn2767m											//新生代大小
+-Xss512k											//线程栈大小
+-XX:MaxPermSize=256m								//最大永久区			
+-XX:LargePageSizeInBytes=128m						//largePage的size					
+-XX:+ExplicitGCInvokesConcurrent					//降低cms的停顿的时间	
+-XX:+ExplicitGCInvokesConcurrentAndUnloadsClasses	//				
+-XX:+UseParNewGC									//使用Parnewgc 新生代		
+-XX:+UseConcMarkSweepGC								//使用cms			
+-XX:+CMSParallelRemarkEnabled						//开启cms remark					
+-XX:+UseCMSCompactAtFullCollection					//全部收集时候压缩对象						
+	//http://mail.openjdk.java.net/pipermail/hotspot-compiler-dev/2011-March/005057.html	
+	//在使用多层编译模式时，如果UseFastAccessorMethods/UseFastEmptyMethods是开着的，有些多态方法调用点的性能反而会显著下降。所以，为了适应多层编译模式，JDK 7里这两个参数的默认值就被改为false了。 
+-XX:+UseFastAccessorMethods							//
+-XX:+UseCMSInitiatingOccupancyOnly					//启动占用值作为cms的唯一标志						
+-XX:+UseCompressedOops								//启用此选项时，对象引用将被表示为32位偏移量而不是64位指针，这通常会在运行Java堆大小小于32 GB的应用程序时提高性能。			
+-XX:+ReduceInitialCardMarks							//将性能优化策略关闭。				
+-XX:+HeapDumpOnOutOfMemoryError						//error dump					
+-XX:ErrorFile=$CATALINA_HOME/logs/hs_err_pid%p.log	//										
+-XX:HeapDumpPath=$CATALINA_HOME/logs/java_pid.hprof	//										
+-XX:+PrintGCDetails									//		
+-XX:+PrintGCDateStamps								//			
+-verbose:gc											//
+-Xloggc:${CATALINA_LOGS}/gc.log						//					
+-XX:+PrintGCDetails									//		
+-XX:+PrintGCDateStamps								//			
+-Dsun.net.inetaddr.ttl=0							//				
+-Dcatalina.logs=$CATALINA_HOME/logs					//						
+-Dlog4j.defaultInitOverride=true					//						
+-Dlog4j.dir=$CATALINA_LOGS							//				
+-Dlog4j.level=ERROR									//		
+-Dlog.dir=/opt/logs/tomcat							//				
+-Ddata.dir=/opt/data/tomcat							//				
+-Dtmp.dir=/opt/tmp/tomcat							//				
+-Dcache.dir=/opt/cache/tomcat						//					
+-Drocketmq.client.log.loadconfig=false				//							
+"												
+
+# What user should run tomcat
+TOMCAT_USER="tomcat"
+
+# You can change your tomcat locale here
+LANG="zh_CN.UTF-8"
+
+# Run tomcat under the Java Security Manager
+SECURITY_MANAGER="false"
+
+# Time to wait in seconds, before killing process
+SHUTDOWN_WAIT="30"
+
+# Whether to annoy the user with "attempting to shut down" messages or not
+SHUTDOWN_VERBOSE="false"
+
+# Set the TOMCAT_PID location
+CATALINA_PID="/var/run/tomcat.pid"
+
+# Connector port is 8080 for this tomcat instance
+#CONNECTOR_PORT="8080"
+
+# If you wish to further customize your tomcat environment,
+# put your own definitions here
+# (i.e. LD_LIBRARY_PATH for some jdbc drivers)
