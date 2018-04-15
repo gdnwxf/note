@@ -77,9 +77,60 @@ reactor 模型启动
 	 						-> success(auth);					通过认证, 设置后端
 	 							-> source.setHandler(new FrontendCommandHandler(source));  注册回调  重新设置handler 为第二次读做准备, 处理MySQL 返回的读
 	 							-> source.write(source.writeToBuffer(AUTH_OK, buffer));    写入->
-	 								-> NIOReactor.R.write
+	 								-> NIOReactor.W.write
 	 								-> AbstractConnection.writeByEvent 唤醒写事件
-	 								-> 
-
-
+	 								-> NIOReactor.R.write
+	FrontendCommandHandler.handle
+		-> @Override
+	    public void handle(byte[] data) {
+	        switch (data[4]) {
+	        case MySQLPacket.COM_INIT_DB:
+	            commands.doInitDB();
+	            source.initDB(data);
+	            break;
+	        case MySQLPacket.COM_QUERY:
+	            commands.doQuery();
+	            source.query(data);
+	            break;
+	        case MySQLPacket.COM_PING:
+	            commands.doPing();
+	            source.ping();
+	            break;
+	        case MySQLPacket.COM_QUIT:
+	            commands.doQuit();
+	            source.close();
+	            break;
+	        case MySQLPacket.COM_PROCESS_KILL:
+	            commands.doKill();
+	            source.kill(data);
+	            break;
+	        case MySQLPacket.COM_STMT_PREPARE:
+	            commands.doStmtPrepare();
+	            source.stmtPrepare(data);
+	            break;
+	        case MySQLPacket.COM_STMT_EXECUTE:
+	            commands.doStmtExecute();
+	            source.stmtExecute(data);
+	            break;
+	        case MySQLPacket.COM_STMT_CLOSE:
+	            commands.doStmtClose();
+	            source.stmtClose(data);
+	            break;
+	        case MySQLPacket.COM_HEARTBEAT:
+	            commands.doHeartbeat();
+	            source.heartbeat(data);
+	            break;
+	        default:
+	            commands.doOther();
+	            source.writeErrMessage(ErrorCode.ER_UNKNOWN_COM_ERROR, "Unknown command");
+	    ->  FrontendConnection.query(sql)
+	    	-> ServerQueryHandler.query(sql)
+	    		-> SelectHandler.handle(stmt,ServerConnection,offs)
+	    			-> ServerConnection.execute(sql, type)
+	    				-> SchemaConfig schema = CobarServer.getInstance().getConfig().getSchemas().get(db);
+	    				-> RouteResultset rrs = ServerRouter.route(schema, sql, this.charset, this); // 拆分sql 设置结果集  设置节点等的信息
+	    					-> RouteResultset rrs = new RouteResultset(stmt);//route ResultSet
+	    					// 检查是否含有cobar hint
+        					-> int prefixIndex = HintRouter.indexOfPrefix(stmt);
+	    				-> BlockingSession.execute(rrs, type); // blockingsession是指mysql的connection 是blocking 的
 
