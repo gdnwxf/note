@@ -1,6 +1,8 @@
 
 //mysql 协议
 https://blog.csdn.net/wind520/article/details/43964821
+serverSocket
+https://blog.csdn.net/robinjwong/article/details/41792623
 cobar服务端 源码分析
 schame rute 等信息的配置
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -135,5 +137,5 @@ reactor 模型启动
 	    					-> RouteResultset rrs = new RouteResultset(stmt);//route ResultSet
 	    					// 检查是否含有cobar hint
         					-> int prefixIndex = HintRouter.indexOfPrefix(stmt);
-	    				-> BlockingSession.execute(rrs, type); // blockingsession是指mysql的connection 是blocking 的
+	    				-> BlockingSession.execute(rrs, type); // blockingsession是指mysql的connection 是blocking 的  然后返回处理的结果
 
