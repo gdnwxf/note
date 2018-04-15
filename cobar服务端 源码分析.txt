@@ -159,9 +159,19 @@ reactor 模型启动
             						-> icExecutor.commit(ok, ss, ss.getTarget().size());	 // 前端非事务模式，后端事务模式，则需要自动递交后端事务。
             						-> ok.write(source);  //向nioreactor 注册写事件  将sql 执行结果返回给前端
 ------------------------------------------------------------------------------------------------------------
+// mysqlChannel  连接数据库的
+	socket = new Socket();
+    socket.setTcpNoDelay(true);
+    socket.setTrafficClass(0x04 | 0x10);
+    socket.setPerformancePreferences(0, 2, 1);
+    socket.setReceiveBufferSize(RECV_BUFFER_SIZE);
+    socket.setSendBufferSize(SEND_BUFFER_SIZE);
+    socket.connect(new InetSocketAddress(dsc.getHost(), dsc.getPort()), SOCKET_CONNECT_TIMEOUT);
+    in = new BufferedInputStream(socket.getInputStream(), INPUT_STREAM_BUFFER);
+    out = new BufferedOutputStream(socket.getOutputStream(), OUTPUT_STREAM_BUFFER);
+------------------------------------------------------------------------------------------------------------
 // 这个是关联mysqlchannel 的关键一环
 RouteResultsetNode  根据sql解析出来的
     private final String name; // 数据节点名称
     private final int replicaIndex;// 数据源编号
     private final String statement; // 执行的语句
-
