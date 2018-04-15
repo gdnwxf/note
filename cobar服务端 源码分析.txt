@@ -7,6 +7,7 @@ mvcc 的实现
 https://liuzhengyang.github.io/2017/04/18/innodb-mvcc/
 cobar服务端 源码分析
 schame rute 等信息的配置
+CommandCount 统计信息
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 服务端入口 CobarStartup
 	CobarServer server = CobarServer.getInstance();
@@ -140,4 +141,23 @@ reactor 模型启动
 	    					// 检查是否含有cobar hint
         					-> int prefixIndex = HintRouter.indexOfPrefix(stmt);
 	    				-> BlockingSession.execute(rrs, type); // blockingsession是指mysql的connection 是blocking 的  然后返回处理的结果
+	    					-> SingleNodeExecutor.execute
+	    					-> MultiNodeExecutor.execute
+	    						-> MultiNodeExecutor.newExecute
+	    						-> CobarConfig conf = CobarServer.getInstance().getConfig();  //找到后端的数据节点
+	    						-> final MySQLDataNode dn = conf.getDataNodes().get(rrn.getName()); //找到MySQLDataNode
+	    						-> (MySQLChannel) Channel old = ss.getTarget().put(rrn, c);	// 重新放入到blokingSession/nonblockingsession
+	    						-> execute0(rrn, c, autocommit, ss, flag);
+	    						  // 执行并等待返回
+            					-> BinaryPacket bin = ((MySQLChannel) c).execute(rrn, sc, autocommit); //从后端mysql中得到对应的数据
+            					// 只要有任何的失败都返回
+            					-> handleSuccessOK(ss, rrn, autocommit, ok); || handleFailure(ss, rrn, new BinaryErrInfo((MySQLChannel) c, bin, sc, rrn));  //处理正确或者失败的结果
+            						-> icExecutor.commit(ok, ss, ss.getTarget().size());	 // 前端非事务模式，后端事务模式，则需要自动递交后端事务。
+            						-> ok.write(source);  //向nioreactor 注册写事件  将sql 执行结果返回给前端
+------------------------------------------------------------------------------------------------------------
+// 这个是关联mysqlchannel 的关键一环
+RouteResultsetNode  根据sql解析出来的
+    private final String name; // 数据节点名称
+    private final int replicaIndex;// 数据源编号
+    private final String statement; // 执行的语句
 
