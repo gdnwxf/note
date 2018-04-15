@@ -3,6 +3,8 @@
 https://blog.csdn.net/wind520/article/details/43964821
 serverSocket
 https://blog.csdn.net/robinjwong/article/details/41792623
+mvcc 的实现
+https://liuzhengyang.github.io/2017/04/18/innodb-mvcc/
 cobar服务端 源码分析
 schame rute 等信息的配置
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
