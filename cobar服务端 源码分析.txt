@@ -9,6 +9,8 @@ cobar服务端 源码分析
 schame rute 等信息的配置
 CommandCount 统计信息
 [ 每个datasource的链接最大值是128 且超过此值时有警告 ]
+[ 分多个库得结果处理是执行完所有库的返回结果统一写到 blockingsession/nonblockingsession , 通过信号量来控制]
+[ com.alibaba.cobar.mysql.bio.executor.MultiNodeExecutor#handleSuccessOK  decrementCountAndIsZero() == true 表示处理完所有节点的返回  然后向前段写回数据]
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 服务端入口 CobarStartup
 	CobarServer server = CobarServer.getInstance();
