@@ -149,6 +149,7 @@ reactor 模型启动
 	    						-> c = (i == DEFAULT_REPLICA_INDEX) ? dn.getChannel() : dn.getChannel(i); // c 依赖于
 	    						  // 其中依赖关系 : Channel --> MySQLDataNode.getChannel --> MySQLDataSource.getChannel
 	    						   --> Channel c = factory.make(this); --> c.connect(node.getConfig().getWaitTimeout());
+	    						   // 里面包含了和mysql的服务器的握手协议等等的信息
 	    						   --> MySQLChannel.connection 链接
 	    						-> (MySQLChannel) Channel old = ss.getTarget().put(rrn, c);	// 重新放入到blokingSession/nonblockingsession
 	    						-> execute0(rrn, c, autocommit, ss, flag);
