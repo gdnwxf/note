@@ -175,3 +175,151 @@ RouteResultsetNode  根据sql解析出来的
     private final String name; // 数据节点名称
     private final int replicaIndex;// 数据源编号
     private final String statement; // 执行的语句
+------------------------------------------------------------------------------------------------------------
+// 计算路由的核心代码
+    public static RouteResultset route(SchemaConfig schema, String stmt, String charset, Object info)
+            throws SQLNonTransientException {
+        RouteResultset rrs = new RouteResultset(stmt);
+
+        // 检查是否含有cobar hint
+        int prefixIndex = HintRouter.indexOfPrefix(stmt);
+        if (prefixIndex >= 0) {
+            HintRouter.routeFromHint(info, schema, rrs, prefixIndex, stmt);
+            return rrs;
+        }
+
+        // 检查schema是否含有拆分库
+        if (schema.isNoSharding()) {
+            if (schema.isKeepSqlSchema()) {
+                SQLStatement ast = SQLParserDelegate.parse(stmt, charset == null
+                        ? MySQLParser.DEFAULT_CHARSET : charset);
+                PartitionKeyVisitor visitor = new PartitionKeyVisitor(schema.getTables());
+                visitor.setTrimSchema(schema.getName());
+                ast.accept(visitor);
+                if (visitor.isSchemaTrimmed()) {
+                    stmt = genSQL(ast, stmt);
+                }
+            }
+            RouteResultsetNode[] nodes = new RouteResultsetNode[1];
+            nodes[0] = new RouteResultsetNode(schema.getDataNode(), stmt);
+            rrs.setNodes(nodes);
+            return rrs;
+        }
+
+        // 生成和展开AST
+        SQLStatement ast = SQLParserDelegate.parse(stmt, charset == null ? MySQLParser.DEFAULT_CHARSET : charset);
+        PartitionKeyVisitor visitor = new PartitionKeyVisitor(schema.getTables());
+        visitor.setTrimSchema(schema.isKeepSqlSchema() ? schema.getName() : null);
+        ast.accept(visitor);
+
+        // 如果sql包含用户自定义的schema，则路由到default节点
+        if (schema.isKeepSqlSchema() && visitor.isCustomedSchema()) {
+            if (visitor.isSchemaTrimmed()) {
+                stmt = genSQL(ast, stmt);
+            }
+            RouteResultsetNode[] nodes = new RouteResultsetNode[1];
+            nodes[0] = new RouteResultsetNode(schema.getDataNode(), stmt);
+            rrs.setNodes(nodes);
+            return rrs;
+        }
+
+        // 元数据语句路由
+        if (visitor.isTableMetaRead()) {
+            MetaRouter.routeForTableMeta(rrs, schema, ast, visitor, stmt);
+            if (visitor.isNeedRewriteField()) {
+                rrs.setFlag(RouteResultset.REWRITE_FIELD);
+            }
+            return rrs;
+        }
+
+        // 匹配规则
+        TableConfig matchedTable = null;
+        RuleConfig rule = null;
+        Map<String, List<Object>> columnValues = null;
+        Map<String, Map<String, List<Object>>> astExt = visitor.getColumnValue();
+        Map<String, TableConfig> tables = schema.getTables();
+        ft: for (Entry<String, Map<String, List<Object>>> e : astExt.entrySet()) {
+            Map<String, List<Object>> col2Val = e.getValue();
+            TableConfig tc = tables.get(e.getKey());
+            if (tc == null) {
+                continue;
+            }
+            if (matchedTable == null) {
+                matchedTable = tc;
+            }
+            if (col2Val == null || col2Val.isEmpty()) {
+                continue;
+            }
+            TableRuleConfig tr = tc.getRule();
+            if (tr != null) {
+                for (RuleConfig rc : tr.getRules()) {
+                    boolean match = true;
+                    for (String ruleColumn : rc.getColumns()) {
+                        match &= col2Val.containsKey(ruleColumn);
+                    }
+                    if (match) {
+                        columnValues = col2Val;
+                        rule = rc;
+                        matchedTable = tc;
+                        break ft;
+                    }
+                }
+            }
+        }
+
+        // 规则匹配处理，表级别和列级别。
+        if (matchedTable == null) {
+            String sql = visitor.isSchemaTrimmed() ? genSQL(ast, stmt) : stmt;
+            RouteResultsetNode[] rn = new RouteResultsetNode[1];
+            if ("".equals(schema.getDataNode()) && isSystemReadSQL(ast)) {
+                rn[0] = new RouteResultsetNode(schema.getRandomDataNode(), sql);
+            } else {
+                rn[0] = new RouteResultsetNode(schema.getDataNode(), sql);
+            }
+            rrs.setNodes(rn);
+            return rrs;
+        }
+        if (rule == null) {
+            if (matchedTable.isRuleRequired()) {
+                throw new IllegalArgumentException("route rule for table " + matchedTable.getName() + " is required: "
+                        + stmt);
+            }
+            String[] dataNodes = matchedTable.getDataNodes();
+            String sql = visitor.isSchemaTrimmed() ? genSQL(ast, stmt) : stmt;
+            RouteResultsetNode[] rn = new RouteResultsetNode[dataNodes.length];
+            for (int i = 0; i < dataNodes.length; ++i) {
+                rn[i] = new RouteResultsetNode(dataNodes[i], sql);
+            }
+            rrs.setNodes(rn);
+            setGroupFlagAndLimit(rrs, visitor);
+            return rrs;
+        }
+
+        // 规则计算
+        validateAST(ast, matchedTable, rule, visitor);
+        Map<Integer, List<Object[]>> dnMap = ruleCalculate(matchedTable, rule, columnValues);
+        if (dnMap == null || dnMap.isEmpty()) {
+            throw new IllegalArgumentException("No target dataNode for rule " + rule);
+        }
+
+        // 判断路由结果是单库还是多库
+        if (dnMap.size() == 1) {
+            String dataNode = matchedTable.getDataNodes()[dnMap.keySet().iterator().next()];
+            String sql = visitor.isSchemaTrimmed() ? genSQL(ast, stmt) : stmt;
+            RouteResultsetNode[] rn = new RouteResultsetNode[1];
+            rn[0] = new RouteResultsetNode(dataNode, sql);
+            rrs.setNodes(rn);
+        } else {
+            RouteResultsetNode[] rn = new RouteResultsetNode[dnMap.size()];
+            if (ast instanceof DMLInsertReplaceStatement) {
+                DMLInsertReplaceStatement ir = (DMLInsertReplaceStatement) ast;
+                dispatchInsertReplace(rn, ir, rule.getColumns(), dnMap, matchedTable, stmt, visitor);
+            } else {
+                dispatchWhereBasedStmt(rn, ast, rule.getColumns(), dnMap, matchedTable, stmt, visitor);
+            }
+            rrs.setNodes(rn);
+            setGroupFlagAndLimit(rrs, visitor);
+        }
+
+        return rrs;
+    }
