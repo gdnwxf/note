@@ -8,6 +8,7 @@ https://liuzhengyang.github.io/2017/04/18/innodb-mvcc/
 cobar服务端 源码分析
 schame rute 等信息的配置
 CommandCount 统计信息
+[ 每个datasource的链接最大值是128 且超过此值时有警告 ]
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 服务端入口 CobarStartup
 	CobarServer server = CobarServer.getInstance();
