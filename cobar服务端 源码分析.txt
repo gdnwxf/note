@@ -181,7 +181,7 @@ RouteResultsetNode  根据sql解析出来的
             throws SQLNonTransientException {
         RouteResultset rrs = new RouteResultset(stmt);
 
-        // 检查是否含有cobar hint
+        // 检查是否含有cobar hint  如果有hint 直接去对应的库里面查询
         int prefixIndex = HintRouter.indexOfPrefix(stmt);
         if (prefixIndex >= 0) {
             HintRouter.routeFromHint(info, schema, rrs, prefixIndex, stmt);
@@ -193,7 +193,7 @@ RouteResultsetNode  根据sql解析出来的
             if (schema.isKeepSqlSchema()) {
                 SQLStatement ast = SQLParserDelegate.parse(stmt, charset == null
                         ? MySQLParser.DEFAULT_CHARSET : charset);
-                PartitionKeyVisitor visitor = new PartitionKeyVisitor(schema.getTables());
+                PartitionKeyVisitor visitor = new PartitionKeyVisitor(schema.getTables());   //获取的表的分区key
                 visitor.setTrimSchema(schema.getName());
                 ast.accept(visitor);
                 if (visitor.isSchemaTrimmed()) {
@@ -206,7 +206,7 @@ RouteResultsetNode  根据sql解析出来的
             return rrs;
         }
 
-        // 生成和展开AST
+        // 生成和展开AST   根据传过来的statement 计算出
         SQLStatement ast = SQLParserDelegate.parse(stmt, charset == null ? MySQLParser.DEFAULT_CHARSET : charset);
         PartitionKeyVisitor visitor = new PartitionKeyVisitor(schema.getTables());
         visitor.setTrimSchema(schema.isKeepSqlSchema() ? schema.getName() : null);
@@ -238,6 +238,7 @@ RouteResultsetNode  根据sql解析出来的
         Map<String, List<Object>> columnValues = null;
         Map<String, Map<String, List<Object>>> astExt = visitor.getColumnValue();
         Map<String, TableConfig> tables = schema.getTables();
+        // key 表名  value Map<Column, List<值>>  Map<String, List<Object>>
         ft: for (Entry<String, Map<String, List<Object>>> e : astExt.entrySet()) {
             Map<String, List<Object>> col2Val = e.getValue();
             TableConfig tc = tables.get(e.getKey());
@@ -254,6 +255,7 @@ RouteResultsetNode  根据sql解析出来的
             if (tr != null) {
                 for (RuleConfig rc : tr.getRules()) {
                     boolean match = true;
+                    // 必须匹配规则中的每个字段
                     for (String ruleColumn : rc.getColumns()) {
                         match &= col2Val.containsKey(ruleColumn);
                     }
@@ -266,7 +268,7 @@ RouteResultsetNode  根据sql解析出来的
                 }
             }
         }
-
+        // 表级别只会有单个库
         // 规则匹配处理，表级别和列级别。
         if (matchedTable == null) {
             String sql = visitor.isSchemaTrimmed() ? genSQL(ast, stmt) : stmt;
