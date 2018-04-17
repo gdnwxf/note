@@ -5,6 +5,8 @@ rocketmq 源码分析
 	https://blog.csdn.net/iie_libi/article/details/54236502
 	https://blog.csdn.net/chunlongyu/article/category/6638499
 
+	namesvr详解
+		https://blog.csdn.net/mr253727942/article/details/52637126
 	为什么RocketMQ要去除ZK依赖？
 		https://blog.csdn.net/chunlongyu/article/details/54018010
 	阿里中间件团队
@@ -55,8 +57,50 @@ rocketmq 源码分析
 		是存放在Broker，
 		还是NameServer上面呢？
 		RocketMQ选择了存放在Broker上面。具体做法是：客户端会通过心跳消息，不停的上报自己，RegisterConsumer。 //  放到了ConsumerManager currentHashMap< String/* Group */,ConsumerGroupInfo>
+	消息清理
+		 扫描间隔
+		     默认10秒，由broker配置参数cleanResourceInterval决定
+		 空间阈值
+		     物理文件不能无限制的一直存储在磁盘，当磁盘空间达到阈值时，不再接受消息，broker打印出日志，消息发送失败，阈值为固定值85%
+		 清理时机
+		     默认每天凌晨4点，由broker配置参数deleteWhen决定；或者磁盘空间达到阈值
+		 文件保留时长
+		     默认72小时，由broker配置参数fileReservedTime决定
+	可靠性
+	 	所有发往broker的消息，有同步刷盘和异步刷盘机制，总的来说，可靠性非常高
+	 	同步刷盘时，消息写入物理文件才会返回成功，因此非常可靠
+	 	异步刷盘时，只有机器宕机，才会产生消息丢失，broker挂掉可能会发生，但是机器宕机崩溃是很少发生的，除非突然断电
+ 	读写性能
+		文件内存映射方式操作文件，避免read/write系统调用和实时文件读写，性能非常高
+		永远一个文件在写，其他文件在读
+		顺序写，随机读
+		利用linux的sendfile？？？mmap+write吧机制，将消息内容直接输出到sokect管道，避免系统调用
+	系统特性
+	 	大内存，内存越大性能越高，否则系统swap会成为性能瓶颈
+	 	IO密集
+	 	cpu load高，使用率低，因为cpu占用后，大部分时间在IO WAIT
+	 	磁盘可靠性要求高，为了兼顾安全和性能，采用RAID10阵列
+	 	磁盘读取速度要求快，要求高转速大容量磁盘
 
-	
+
+	 	namesrv 
+	 		broker启动，将自身创建的topic等信息注册到Namesrv上, consumer和producer需要配置namesrv的地址，启动后，首先和namesrv建立长连接，并获取相应的topic信息(比如，哪些broker有topic路由信息)，然后再和broker建立长连接。
+	 		NamesrvStartUp:NameServer启动类
+			NamesrvController:NameServer控制类，管控NameServer的启动、初始化、停止等生命周期
+			RouteInfoManager:这个类非常重要，存放了topic队列信息，broker地址列表等一系列重要数据结构，并提供了对应的数据变更接口。
+			DefaultRequestProcessosr:负责处理所broker发过来的所有网络消息，封装了对netty包的处理和部分对nameServer存储的数据查询和删除。
+			----------------------------------------------------------------------------------------
+	 		private final HashMap<String/* topic */, List<QueueData>> topicQueueTable;//topic队列表，存储了每个topic包含的队列数据
+			private final HashMap<String/* brokerName */, BrokerData> brokerAddrTable; //broker地址表						
+			private final HashMap<String/* clusterName */, Set<String/* brokerName */>> clusterAddrTable; //集群主备信息表
+			//其中的BrokerLiveInfo存储了broker的版本号，channel，和最近心跳时间等信息
+			private final HashMap<String/* brokerAddr */, BrokerLiveInfo> brokerLiveTable; //broker存活状态信息表，
+			//记录了每个broker的filter信息.
+			private final HashMap<String/* brokerAddr */, List<String>/* Filter Server */> filterServerTable; 
+			private final HashMap<String/* Namespace */, HashMap<String/* Key */, String/* Value */>> configTable
+	 		//根据namespace配置区分的config表
+	 	broker 维护的是所有消费者和
+
  供销比
 
 工程 broker 
