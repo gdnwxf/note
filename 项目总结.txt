@@ -30,8 +30,8 @@
 										   		[ stockinfo ] /加权平均价 
 										   	 	[ microgoods ] /微店商品
 										   	 	[ microPrice ] /微店价格
-										   	 	[ purchase_avg_change_log ] /采购平均价 {stockinfo.powerPrice}
-										   	 	[ cost_price_change_log ] /成本价价 {stockinfo.powerPrice}
+										   	 	[ purchase_avg_change_log ] /采购平均价 {stockinfo.powerPrice} /记录每一天powerprice 采购平均价记录
+										   	 	[ cost_price_change_log ] /成本价价 {stockinfo.powerPrice} /powerprice 变更记录
 										   	// 修改商品
 										   		[ catagory ] /分类 insert
 										   		[ goodsUnit ] /商品单位 insert
