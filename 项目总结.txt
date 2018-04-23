@@ -42,7 +42,7 @@
 										   	 	[ purchase_avg_change_log ] /采购平均价 {stockinfo.powerPrice} update
 										   	 	[ cost_price_change_log ] /成本价价 {stockinfo.powerPrice} update
 										    --->/过滤掉无效的商品 ("DELETE" , barcode.contains("#") , 全量)
-										   	 	/处理一码多品的问题	( 更新最后一条, <映射关系返回最后一条id> )
+										   	 	/处理一码多品的问题	( 更新最后一条, <映射关系返回最后一条id> ) [增量]
 										   	 	/增量更新商品 必然会传 isvGoodsId 
 										   	 	/ < 问题:> 计次服务的问题(有计次服务的商品还没有使用完的商品 不能删除 -> 直接抛出错误)
 										   	 	/ 
