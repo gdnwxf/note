@@ -5,7 +5,7 @@ rocketmq 源码分析
 	https://blog.csdn.net/iie_libi/article/details/54236502
 	https://blog.csdn.net/chunlongyu/article/category/6638499
 
-	namesvr详解
+	namesvr 详解
 		https://blog.csdn.net/mr253727942/article/details/52637126
 	为什么RocketMQ要去除ZK依赖？
 		https://blog.csdn.net/chunlongyu/article/details/54018010
