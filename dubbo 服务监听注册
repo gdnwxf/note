@@ -3,16 +3,27 @@ dubbo 服务监听注册 client端
 	->com.alibaba.dubbo.rpc.protocol.ProtocolFilterWrapper#refer
 	->com.alibaba.dubbo.rpc.protocol.ProtocolListenerWrapper#refer
 	->com.alibaba.dubbo.registry.integration.RegistryProtocol#refer
-	-> Registry registry = registryFactory.getRegistry(url);//获取注册中心 获取 创建 链接zk注册中心
-	->com.alibaba.dubbo.registry.integration.RegistryProtocol#doRefer
+		->Registry registry = registryFactory.getRegistry(url);//获取注册中心 获取 创建 链接zk注册中心
+	->com.alibaba.dubbo.registry.integration.RegistryProtocol#doRefer  
 	->RegistryDirectory<T> directory = new RegistryDirectory<T>(type, url);实力化注册目录
 	->directory.subscribe(subscribeUrl.addParameter(Constants.CATEGORY_KEY,
                 Constants.PROVIDERS_CATEGORY
                         + "," + Constants.CONFIGURATORS_CATEGORY
-                        + "," + Constants.ROUTERS_CATEGORY));  订阅注册中心
+                        + "," + Constants.ROUTERS_CATEGORY));  订阅注册中心	
+		->实现invoker监听回调
+		->com.alibaba.dubbo.registry.integration.RegistryDirectory#subscribe
+		->com.alibaba.dubbo.registry.support.FailbackRegistry#subscribe
+		->com.alibaba.dubbo.registry.zookeeper.ZookeeperRegistry#doSubscribe
+		->com.alibaba.dubbo.registry.support.FailbackRegistry#notify
+		->com.alibaba.dubbo.registry.support.FailbackRegistry#doNotify
+		->com.alibaba.dubbo.registry.integration.RegistryDirectory#notify
+		->com.alibaba.dubbo.registry.integration.RegistryDirectory#refreshInvoker
+		->com.alibaba.dubbo.registry.integration.RegistryDirectory#toInvokers
+		->invoker = new InvokerDelegate<T>(protocol.refer(serviceType, url), url, providerUrl); 封装invoker
     ->Invoker invoker = cluster.join(directory);
 		->com.alibaba.dubbo.rpc.cluster.support.wrapper.MockClusterWrapper#join mockcluster
 		->com.alibaba.dubbo.rpc.cluster.support.FailoverCluster#join 默认failover  实例化并封装 FailoverClusterInvoker(RegistryDirectory) 返回 FailoverClusterInvoker 
 			->new FailoverClusterInvoker<T>(directory);
 		->new MockClusterInvoker<T>(directory,this.cluster.join(directory));  cluster = FailoverClusterInvoker  directory = RegistryDirectory
 	->ProviderConsumerRegTable.registerConsumer(invoker, url, subscribeUrl, directory); //注册到 providerconsumerRegtable 服务者消费者注册表
+	
