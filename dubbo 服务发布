@@ -1,0 +1,52 @@
+dubbo 服务发布
+ProtocolConfig : configs  每个协议发布一个服务
+->com.alibaba.dubbo.rpc.protocol.ProtocolListenerWrapper#export
+->com.alibaba.dubbo.rpc.protocol.ProtocolFilterWrapper#export
+->com.alibaba.dubbo.registry.integration.RegistryProtocol#export
+	->doLocalExport 发布本地服务
+		->com.alibaba.dubbo.rpc.Protocol$Adaptive#export
+			->ServiceClassHolder.getInstance().pushServiceClass(getServiceClass(ref));
+			->protocol.export(proxyFactory.getInvoker(ref, (Class) interfaceClass, local));
+				->com.alibaba.dubbo.rpc.Protocol$Adaptive#export
+					->new ListenerExporterWrapper<T>(protocol.export(invoker),
+						 Collections.unmodifiableList(ExtensionLoader.getExtensionLoader(ExporterListener.class)
+                        .getActivateExtension(invoker.getUrl(), Constants.EXPORTER_LISTENER_KEY)));
+                        ->com.alibaba.dubbo.rpc.protocol.ProtocolFilterWrapper#export
+                        	->protocol.export(buildInvokerChain(invoker, Constants.SERVICE_FILTER_KEY, Constants.PROVIDER));
+                        		->new InjvmExporter<T>(invoker, invoker.getUrl().getServiceKey(), exporterMap);
+			->exporters.add(exporter);
+远程服务
+	根据配置的registryURLs注册地址 每个地址都要发布  默认代理javassist
+	->Invoker<?> invoker = proxyFactory.getInvoker(ref, (Class) interfaceClass, registryURL.addParameterAndEncoded(Constants.EXPORT_KEY, url.toFullString()));
+	->DelegateProviderMetaDataInvoker wrapperInvoker = new DelegateProviderMetaDataInvoker(invoker, this);
+	->Exporter<?> exporter = protocol.export(wrapperInvoker);
+		->com.alibaba.dubbo.rpc.Protocol$Adaptive#export
+			->com.alibaba.dubbo.rpc.protocol.ProtocolListenerWrapper#export
+				->com.alibaba.dubbo.rpc.protocol.ProtocolFilterWrapper#export
+				->com.alibaba.dubbo.registry.integration.RegistryProtocol#export
+				发布本地服务开始
+				final ExporterChangeableWrapper<T> exporter = doLocalExport(originInvoker);
+				->com.alibaba.dubbo.rpc.Protocol#export
+					->DubboExporter<T> exporter = new DubboExporter<T>(invoker, key, exporterMap);封装dubboexporter
+					->exporterMap.put(key, exporter); 放入exporterMap
+					->openServer(url);
+					->com.alibaba.dubbo.rpc.protocol.dubbo.DubboProtocol#openServer 打开服务器
+					->com.alibaba.dubbo.rpc.protocol.dubbo.DubboProtocol#createServer
+					->com.alibaba.dubbo.remoting.exchange.Exchangers#bind(com.alibaba.dubbo.common.URL, com.alibaba.dubbo.remoting.exchange.ExchangeHandler)
+					->com.alibaba.dubbo.remoting.exchange.support.header.HeaderExchanger#bind
+					->com.alibaba.dubbo.remoting.Transporters#bind(com.alibaba.dubbo.common.URL, com.alibaba.dubbo.remoting.ChannelHandler...)
+					->com/alibaba/dubbo/remoting/Transporters.java:48
+					->com.alibaba.dubbo.remoting.transport.netty.NettyTransporter#bind
+					->com.alibaba.dubbo.remoting.transport.AbstractServer#AbstractServer
+					->com.alibaba.dubbo.remoting.transport.AbstractServer#doOpen
+					->com.alibaba.dubbo.remoting.transport.netty4.NettyServer#doOpen
+						-> 启动netty 服务器 绑定编解码 获取channel
+				->URL registryUrl = getRegistryUrl(originInvoker); 获取注册中心地址
+				->Registry registry = getRegistry(originInvoker); 注册provider
+				 	->com.alibaba.dubbo.registry.zookeeper.ZookeeperRegistryFactory#createRegistry
+				  	->new ZookeeperRegistry(url, zookeeperTransporter);
+				  	->com.alibaba.dubbo.registry.integration.RegistryProtocol#register
+				  	->com.alibaba.dubbo.registry.support.AbstractRegistry#register
+				->ProviderConsumerRegTable.registerProvider(originInvoker, registryUrl, registedProviderUrl);
+				->registry.subscribe(overrideSubscribeUrl, overrideSubscribeListener); 注册订阅
+
