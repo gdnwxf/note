@@ -20,10 +20,25 @@ dubbo 服务监听注册 client端
 		->com.alibaba.dubbo.registry.integration.RegistryDirectory#refreshInvoker
 		->com.alibaba.dubbo.registry.integration.RegistryDirectory#toInvokers
 		->invoker = new InvokerDelegate<T>(protocol.refer(serviceType, url), url, providerUrl); 封装invoker
-    ->Invoker invoker = cluster.join(directory);
-		->com.alibaba.dubbo.rpc.cluster.support.wrapper.MockClusterWrapper#join mockcluster
+			->protocol.refer 封装
+				->com.alibaba.dubbo.rpc.protocol.ProtocolFilterWrapper#buildInvokerChain
+				->com.alibaba.dubbo.rpc.protocol.ProtocolListenerWrapper#refer
+				->new ListenerInvokerWrapper<T>(protocol.refer(type, url),
+	                Collections.unmodifiableList(
+	                        ExtensionLoader.getExtensionLoader(InvokerListener.class)
+	                                .getActivateExtension(url, Constants.INVOKER_LISTENER_KEY)));
+	            ->com.alibaba.dubbo.rpc.protocol.dubbo.DubboProtocol#refer
+	            ->DubboInvoker<T> invoker = new DubboInvoker<T>(serviceType, url, getClients(url), invokers); 封装成dubboinvoker
+	            ->invokers.add(invoker);添加到invokers
+    ->Invoker invoker = cluster.join(directory);// 把目录添加mockcluster 
+		->com.alibaba.dubbo.rpc.cluster.support.wrapper.MockClusterWrapper#join mockcluster里面封装failoverclusterInvoker
 		->com.alibaba.dubbo.rpc.cluster.support.FailoverCluster#join 默认failover  实例化并封装 FailoverClusterInvoker(RegistryDirectory) 返回 FailoverClusterInvoker 
 			->new FailoverClusterInvoker<T>(directory);
 		->new MockClusterInvoker<T>(directory,this.cluster.join(directory));  cluster = FailoverClusterInvoker  directory = RegistryDirectory
 	->ProviderConsumerRegTable.registerConsumer(invoker, url, subscribeUrl, directory); //注册到 providerconsumerRegtable 服务者消费者注册表
 	
+
+
+loadbalance 是doSelect 根据invoker中url来获取的
+ loadbalance = ExtensionLoader.getExtensionLoader(LoadBalance.class).getExtension(invokers.get(0).getUrl()
+                    .getMethodParameter(invocation.getMethodName(), Constants.LOADBALANCE_KEY, Constants.DEFAULT_LOADBALANCE));
