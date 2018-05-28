@@ -1,5 +1,6 @@
 dubbo 服务监听注册 client端
 	根据注册 是否有injvm 来封装injvm的invoker
+	->com.alibaba.dubbo.config.ReferenceConfig#createProxy
 	->com.alibaba.dubbo.rpc.protocol.ProtocolFilterWrapper#refer
 	->com.alibaba.dubbo.rpc.protocol.ProtocolListenerWrapper#refer
 	->com.alibaba.dubbo.registry.integration.RegistryProtocol#refer
