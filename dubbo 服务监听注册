@@ -38,6 +38,8 @@ dubbo 服务监听注册 client端
 		->new MockClusterInvoker<T>(directory,this.cluster.join(directory));  cluster = FailoverClusterInvoker  directory = RegistryDirectory
 	->ProviderConsumerRegTable.registerConsumer(invoker, url, subscribeUrl, directory); //注册到 providerconsumerRegtable 服务者消费者注册表
 	
+    -> end  // create service proxy
+    return (T) proxyFactory.getProxy(invoker); //  最后通过proxyFactory代理FailoverClusterInvoker来返回代理对象
 
 
 loadbalance 是doSelect 根据invoker中url来获取的
