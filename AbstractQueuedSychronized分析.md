@@ -101,66 +101,67 @@ public ReentrantLock(boolean fair) {
 
 * 分析 lock() 和 unlock() 方法
 
-  > 分析之前看看看AbstractQueuedSychronized的Node节点的代码
-  >
-  > ```java
-  >   		/** Marker to indicate a node is waiting in shared mode */
-  >         static final Node SHARED = new Node();
-  >         /** Marker to indicate a node is waiting in exclusive mode */
-  >         static final Node EXCLUSIVE = null;
-  >
-  >         /** waitStatus value to indicate thread has cancelled */
-  >         static final int CANCELLED =  1;
-  >         /** waitStatus value to indicate successor's thread needs unparking */
-  >         static final int SIGNAL    = -1;
-  >         /** waitStatus value to indicate thread is waiting on condition */
-  >         static final int CONDITION = -2;
-  >         /**
-  >          * waitStatus value to indicate the next acquireShared should
-  >          * unconditionally propagate
-  >          */
-  >         static final int PROPAGATE = -3;
-  >
-  >         /**
-  >          * Status field, taking on only the values:
-  >          *   SIGNAL:     The successor of this node is (or will soon be)
-  >          *               blocked (via park), so the current node must
-  >          *               unpark its successor when it releases or
-  >          *               cancels. To avoid races, acquire methods must
-  >          *               first indicate they need a signal,
-  >          *               then retry the atomic acquire, and then,
-  >          *               on failure, block.
-  >          *   CANCELLED:  This node is cancelled due to timeout or interrupt.
-  >          *               Nodes never leave this state. In particular,
-  >          *               a thread with cancelled node never again blocks.
-  >          *   CONDITION:  This node is currently on a condition queue.
-  >          *               It will not be used as a sync queue node
-  >          *               until transferred, at which time the status
-  >          *               will be set to 0. (Use of this value here has
-  >          *               nothing to do with the other uses of the
-  >          *               field, but simplifies mechanics.)
-  >          *   PROPAGATE:  A releaseShared should be propagated to other
-  >          *               nodes. This is set (for head node only) in
-  >          *               doReleaseShared to ensure propagation
-  >          *               continues, even if other operations have
-  >          *               since intervened.
-  >          *   0:          None of the above
-  >          *
-  >          * The values are arranged numerically to simplify use.
-  >          * Non-negative values mean that a node doesn't need to
-  >          * signal. So, most code doesn't need to check for particular
-  >          * values, just for sign.
-  >          *
-  >          * The field is initialized to 0 for normal sync nodes, and
-  >          * CONDITION for condition nodes.  It is modified using CAS
-  >          * (or when possible, unconditional volatile writes).
-  >          */
-  >         volatile int waitStatus;
-  > ```
+分析之前看看看AbstractQueuedSychronized的Node节点的代码
 
-  * SIGNAL 
+```java
+	/** Marker to indicate a node is waiting in shared mode */
+        static final Node SHARED = new Node();
+        /** Marker to indicate a node is waiting in exclusive mode */
+        static final Node EXCLUSIVE = null;
 
-    > 这个节点的后继者（或将很快）被阻塞（通过停泊），因此当前节点在释放或取消时必须取消停放其后继者。为了避免竞争，获得方法必须首先表明他们需要一个信号，然后重试原子获取，然后在失败时阻塞。
+        /** waitStatus value to indicate thread has cancelled */
+        static final int CANCELLED =  1;
+        /** waitStatus value to indicate successor's thread needs unparking */
+        static final int SIGNAL    = -1;
+        /** waitStatus value to indicate thread is waiting on condition */
+        static final int CONDITION = -2;
+        /**
+         * waitStatus value to indicate the next acquireShared should
+         * unconditionally propagate
+         */
+        static final int PROPAGATE = -3;
+
+        /**
+         * Status field, taking on only the values:
+         *   SIGNAL:     The successor of this node is (or will soon be)
+         *               blocked (via park), so the current node must
+         *               unpark its successor when it releases or
+         *               cancels. To avoid races, acquire methods must
+         *               first indicate they need a signal,
+         *               then retry the atomic acquire, and then,
+         *               on failure, block.
+         *   CANCELLED:  This node is cancelled due to timeout or interrupt.
+         *               Nodes never leave this state. In particular,
+         *               a thread with cancelled node never again blocks.
+         *   CONDITION:  This node is currently on a condition queue.
+         *               It will not be used as a sync queue node
+         *               until transferred, at which time the status
+         *               will be set to 0. (Use of this value here has
+         *               nothing to do with the other uses of the
+         *               field, but simplifies mechanics.)
+         *   PROPAGATE:  A releaseShared should be propagated to other
+         *               nodes. This is set (for head node only) in
+         *               doReleaseShared to ensure propagation
+         *               continues, even if other operations have
+         *               since intervened.
+         *   0:          None of the above
+         *
+         * The values are arranged numerically to simplify use.
+         * Non-negative values mean that a node doesn't need to
+         * signal. So, most code doesn't need to check for particular
+         * values, just for sign.
+         *
+         * The field is initialized to 0 for normal sync nodes, and
+         * CONDITION for condition nodes.  It is modified using CAS
+         * (or when possible, unconditional volatile writes).
+         */
+        volatile int waitStatus;
+```
+
+
+* SIGNAL 
+
+> 这个节点的后继者（或将很快）被阻塞（通过停泊），因此当前节点在释放或取消时必须取消停放其后继者。为了避免竞争，获得方法必须首先表明他们需要一个信号，然后重试原子获取，然后在失败时阻塞。
 
 
   * CANCELLED
@@ -169,134 +170,132 @@ public ReentrantLock(boolean fair) {
 
   * CONDITION 
 
-    > 这个节点当前正在一个条件队列中。它不会被用作一个同步队列节点，直到被转移，此时状态将被设置为0.（这里使用这个值与该字段的其他用途无关 ，但是简化了机制。）
+>这个节点当前正在一个条件队列中。它不会被用作一个同步队列节点，直到被转移，此时状态将被设置为0.（这里使用这个值与该字段的其他用途无关 ，但是简化了机制。）
 
   * PROPAGATE 
 
-    > releaseShared应该传播到其他节点。 这在doReleaseShared中设置（仅用于头节点）以确保传播继续，即使其他操作已经介入。
+> releaseShared应该传播到其他节点。 这在doReleaseShared中设置（仅用于头节点）以确保传播继续，即使其他操作已经介入。
 
-    * 状态小结
+  * 状态小结
 
-      >这些值按数字排列以简化使用。 非负值意味着节点不需要信号。 所以，大多数代码不需要检查特定的值，只是为了标志。
-      >
-      >正常同步节点的字段初始化为0，条件节点的CONDITION字段初始化为0。 它使用CAS进行修改（或者在可能的情况下，无条件的volatile写入）。
+> 这些值按数字排列以简化使用。 非负值意味着节点不需要信号。 所以，大多数代码不需要检查特定的值，只是为了标志。
+>
+> 正常同步节点的字段初始化为0，条件节点的CONDITION字段初始化为0。 它使用CAS进行修改（或者在可能的情况下，无条件的volatile写入）。
 
-      ​
+## 公平锁和非公平锁的Sync控制 
 
-    ## 公平锁和非公平锁的Sync控制 
+> 都继承于AbstractQueuedSynchronizer
 
-    > 都继承于AbstractQueuedSynchronizer
+```java
+abstract static class Sync extends AbstractQueuedSynchronizer {
+    private static final long serialVersionUID = -5179523762034025860L;
 
-    ```java
-    abstract static class Sync extends AbstractQueuedSynchronizer {
-        private static final long serialVersionUID = -5179523762034025860L;
+    /**
+     * Performs {@link Lock#lock}. The main reason for subclassing
+     * is to allow fast path for nonfair version.
+     */
+    abstract void lock();
 
-        /**
-         * Performs {@link Lock#lock}. The main reason for subclassing
-         * is to allow fast path for nonfair version.
-         */
-        abstract void lock();
-
-        /**
-         * Performs non-fair tryLock.  tryAcquire is implemented in
-         * subclasses, but both need nonfair try for trylock method.
-         */
-        final boolean nonfairTryAcquire(int acquires) {
-            final Thread current = Thread.currentThread();
-            int c = getState();
-            if (c == 0) {
-                if (compareAndSetState(0, acquires)) {
-                    setExclusiveOwnerThread(current);
-                    return true;
-                }
-            }
-            else if (current == getExclusiveOwnerThread()) {
-                int nextc = c + acquires;
-                if (nextc < 0) // overflow
-                    throw new Error("Maximum lock count exceeded");
-                setState(nextc);
+    /**
+     * Performs non-fair tryLock.  tryAcquire is implemented in
+     * subclasses, but both need nonfair try for trylock method.
+     */
+    final boolean nonfairTryAcquire(int acquires) {
+        final Thread current = Thread.currentThread();
+        int c = getState();
+        if (c == 0) {
+            if (compareAndSetState(0, acquires)) {
+                setExclusiveOwnerThread(current);
                 return true;
             }
-            return false;
         }
-
-        protected final boolean tryRelease(int releases) {
-            int c = getState() - releases;
-            if (Thread.currentThread() != getExclusiveOwnerThread())
-                throw new IllegalMonitorStateException();
-            boolean free = false;
-            if (c == 0) {
-                free = true;
-                setExclusiveOwnerThread(null);
-            }
-            setState(c);
-            return free;
+        else if (current == getExclusiveOwnerThread()) {
+            int nextc = c + acquires;
+            if (nextc < 0) // overflow
+                throw new Error("Maximum lock count exceeded");
+            setState(nextc);
+            return true;
         }
-
-        protected final boolean isHeldExclusively() {
-            // While we must in general read state before owner,
-            // we don't need to do so to check if current thread is owner
-            return getExclusiveOwnerThread() == Thread.currentThread();
-        }
-
-        final ConditionObject newCondition() {
-            return new ConditionObject();
-        }
-
-        // Methods relayed from outer class
-
-        final Thread getOwner() {
-            return getState() == 0 ? null : getExclusiveOwnerThread();
-        }
-
-        final int getHoldCount() {
-            return isHeldExclusively() ? getState() : 0;
-        }
-
-        final boolean isLocked() {
-            return getState() != 0;
-        }
-
-        /**
-         * Reconstitutes the instance from a stream (that is, deserializes it).
-         */
-        private void readObject(java.io.ObjectInputStream s)
-            throws java.io.IOException, ClassNotFoundException {
-            s.defaultReadObject();
-            setState(0); // reset to unlocked state
-        }
+        return false;
     }
-    ```
 
-    #### 非公平锁
+    protected final boolean tryRelease(int releases) {
+        int c = getState() - releases;
+        if (Thread.currentThread() != getExclusiveOwnerThread())
+            throw new IllegalMonitorStateException();
+        boolean free = false;
+        if (c == 0) {
+            free = true;
+            setExclusiveOwnerThread(null);
+        }
+        setState(c);
+        return free;
+    }
 
-    * 入口lock() 
+    protected final boolean isHeldExclusively() {
+        // While we must in general read state before owner,
+        // we don't need to do so to check if current thread is owner
+        return getExclusiveOwnerThread() == Thread.currentThread();
+    }
 
-      ```java
+    final ConditionObject newCondition() {
+        return new ConditionObject();
+    }
+
+    // Methods relayed from outer class
+
+    final Thread getOwner() {
+        return getState() == 0 ? null : getExclusiveOwnerThread();
+    }
+
+    final int getHoldCount() {
+        return isHeldExclusively() ? getState() : 0;
+    }
+
+    final boolean isLocked() {
+        return getState() != 0;
+    }
+
+    /**
+     * Reconstitutes the instance from a stream (that is, deserializes it).
+     */
+    private void readObject(java.io.ObjectInputStream s)
+        throws java.io.IOException, ClassNotFoundException {
+        s.defaultReadObject();
+        setState(0); // reset to unlocked state
+    }
+}
+```
+
+#### 非公平锁
+
+* 入口lock() 
+
+```java
+  /**
+   * Sync object for non-fair locks
+   */
+  static final class NonfairSync extends Sync {
+      private static final long serialVersionUID = 7316153563782823691L;
+
       /**
-       * Sync object for non-fair locks
+       * Performs lock.  Try immediate barge, backing up to normal
+       * acquire on failure.
        */
-      static final class NonfairSync extends Sync {
-          private static final long serialVersionUID = 7316153563782823691L;
-
-          /**
-           * Performs lock.  Try immediate barge, backing up to normal
-           * acquire on failure.
-           */
-         // 非公平锁lock时先直接取设置 state = 1  如果当前是 0 的状态时(其他节点正好入队列) 然后设置排他线程
-         // 否则同公平锁
-          final void lock() {
-              if (compareAndSetState(0, 1))
-                  setExclusiveOwnerThread(Thread.currentThread());
-              else
-                  acquire(1);
-          }
-
-          protected final boolean tryAcquire(int acquires) {
-              return nonfairTryAcquire(acquires);
-          }
+     // 非公平锁lock时先直接取设置 state = 1  如果当前是 0 的状态时(其他节点正好入队列) 然后设置排他线程
+     // 否则同公平锁
+      final void lock() {
+          if (compareAndSetState(0, 1))
+              setExclusiveOwnerThread(Thread.currentThread());
+          else
+              acquire(1);
       }
-      ```
+
+      protected final boolean tryAcquire(int acquires) {
+          return nonfairTryAcquire(acquires);
+      }
+  }
+```
 
 
 #### 公平锁
