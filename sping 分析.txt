@@ -1,0 +1,67 @@
+sping 分析
+	
+getBean(String Name)
+-> doGetBean(Name,null,null,false)
+	-> transformedBeanName(name) // 如name="&aa" 转成 name="aa"
+	-> getSingleton(beanName) //从缓存中获取数据
+		|---------------------------------------------------------------------------------------------------------
+		|	/**
+		|	 * Return the (raw) singleton object registered under the given name.
+		|	 * <p>Checks already instantiated singletons and also allows for an early
+		|	 * reference to a currently created singleton (resolving a circular reference).
+		|	 * @param beanName the name of the bean to look for
+		|	 * @param allowEarlyReference whether early references should be created or not
+		|	 * @return the registered singleton object, or {@code null} if none found
+		|	 */
+		|	protected Object getSingleton(String beanName, boolean allowEarlyReference) {
+		|		Object singletonObject = this.singletonObjects.get(beanName); //从singletonObjects缓存中取
+		|		if (singletonObject == null && isSingletonCurrentlyInCreation(beanName)) {
+		|			synchronized (this.singletonObjects) {
+		|				singletonObject = this.earlySingletonObjects.get(beanName); //取不到从earlySingletonObjects中取 此对象是一
+		|				if (singletonObject == null && allowEarlyReference) {
+		|					ObjectFactory<?> singletonFactory = this.singletonFactories.get(beanName); // 从DefaultSingletonBeanRegistry 的 singletonFactories 中获取 ObjectFactory
+		|					if (singletonFactory != null) {
+		|						singletonObject = singletonFactory.getObject(); //通过FactoryBean 的 getObject() 获取
+		|						this.earlySingletonObjects.put(beanName, singletonObject); // 放入earlySingletonObjects
+		|						this.singletonFactories.remove(beanName); // 确保单例
+		|					}
+		|				}
+		|			}
+		|		}
+		|		return (singletonObject != NULL_OBJECT ? singletonObject : null);
+		|	}
+		---------------------------------------------------------------------------------------------------------
+	->getObjectForBeanInstance
+			|---------------------------------------------------------------------------------------------------------
+			|protected Object getObjectForBeanInstance(
+			|	Object beanInstance, String name, String beanName, RootBeanDefinition mbd) {
+			|
+			|	// Don't let calling code try to dereference the factory if the bean isn't a factory.
+			|	if (BeanFactoryUtils.isFactoryDereference(name) && !(beanInstance instanceof FactoryBean)) {
+			|		throw new BeanIsNotAFactoryException(transformedBeanName(name), beanInstance.getClass());
+			|	}
+			|
+			|	// Now we have the bean instance, which may be a normal bean or a FactoryBean.
+			|	// If it's a FactoryBean, we use it to create a bean instance, unless the
+			|	// caller actually wants a reference to the factory.
+			|	if (!(beanInstance instanceof FactoryBean) || BeanFactoryUtils.isFactoryDereference(name)) {
+			|		return beanInstance;
+			|	}
+			|	
+			|	Object object = null;
+			|	if (mbd == null) {
+			|		object = getCachedObjectForFactoryBean(beanName);
+			|	}
+			|	if (object == null) {
+			|		// Return bean instance from factory.
+			|		FactoryBean<?> factory = (FactoryBean<?>) beanInstance;
+			|		// Caches object obtained from FactoryBean if it is a singleton.
+			|		if (mbd == null && containsBeanDefinition(beanName)) {
+			|			mbd = getMergedLocalBeanDefinition(beanName);
+			|		}
+			|		boolean synthetic = (mbd != null && mbd.isSynthetic());
+			|		object = getObjectFromFactoryBean(factory, beanName, !synthetic);
+			|	}
+			|	return object;
+			|}
+			---------------------------------------------------------------------------------------------------------

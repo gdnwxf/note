@@ -51,3 +51,4 @@ ProtocolConfig : configs  每个协议发布一个服务
 				->registry.subscribe(overrideSubscribeUrl, overrideSubscribeListener); 注册订阅
 
 	->exporters.add(exporter);
+

@@ -1,0 +1,80 @@
+spirng aop 入口
+http\://www.springframework.org/schema/aop=org.springframework.aop.config.AopNamespaceHandler
+AopNamespaceHandler
+
+ */
+public class AopNamespaceHandler extends NamespaceHandlerSupport {
+
+   /**
+    * Register the {@link BeanDefinitionParser BeanDefinitionParsers} for the
+    * '{@code config}', '{@code spring-configured}', '{@code aspectj-autoproxy}'
+    * and '{@code scoped-proxy}' tags.
+    */
+   @Override
+   public void init() {
+      // In 2.0 XSD as well as in 2.1 XSD.
+      registerBeanDefinitionParser("config", new ConfigBeanDefinitionParser());  对应config的配置 对应<aop:config/> 标签
+      registerBeanDefinitionParser("aspectj-autoproxy", new AspectJAutoProxyBeanDefinitionParser()); 对应aspectj的配置 对应<aop:aspectj-autoproxy /> 标签
+      registerBeanDefinitionDecorator("scoped-proxy", new ScopedProxyBeanDefinitionDecorator()); scope的配置 对应 <aop:scoped-proxy/> 标签
+
+      // Only in 2.0 XSD: moved to context namespace as of 2.1
+      registerBeanDefinitionParser("spring-configured", new SpringConfiguredBeanDefinitionParser());
+   }
+
+}
+
+
+spring ioc核心beandefinition
+	BeanDefinition (org.springframework.beans.factory.config)
+		AnnotatedBeanDefinition (org.springframework.beans.factory.annotation)
+			ScannedGenericBeanDefinition (org.springframework.context.annotation)
+			ConfigurationClassBeanDefinition in ConfigurationClassBeanDefinitionReader (	org.springframework.context.annotation)
+			AnnotatedGenericBeanDefinition (org.springframework.beans.factory.annotation)
+		AbstractBeanDefinition (org.springframework.beans.factory.support)
+			RootBeanDefinition (org.springframework.beans.factory.support)
+				ConfigurationClassBeanDefinition in ConfigurationClassBeanDefinitionReader (	org.springframework.context.annotation)
+			ChildBeanDefinition (org.springframework.beans.factory.support)
+			GenericBeanDefinition (org.springframework.beans.factory.support)
+				ScannedGenericBeanDefinition (org.springframework.context.annotation)
+				AnnotatedGenericBeanDefinition (org.springframework.beans.factory.annotation)
+
+
+
+BeanDefinition
+		-> attributeaccessor
+		setAttribute
+		getAttribute
+		removeAttribute
+		hasAttribute
+		attributeNames
+		-> BeanMetadataElement
+		getSource
+	具体详情
+		getParentName					/ 获取parent					
+		setParentName					/ 设置parent 					
+		getBeanClassName				/ beanClassName						
+		setBeanClassName				/ 						
+		getFactoryBeanName				/ factoryBeanName						
+		setFactoryBeanName				/ 						
+		getFactoryMethodName			/ factoryMethodName							
+		setFactoryMethodName			/ 							
+		getScope						/ scope			
+		setScope						/ 				
+		isLazyInit						/ 是否延迟实例化			
+		setLazyInit						/  			
+		getDependsOn					/ 设置依赖的beanName 这些bean由beanfactory提供担保					
+		setDependsOn					/ 					
+		isAutowireCandidate				/ 						
+		setAutowireCandidate			/ 设置bean是否被其他bean依赖的 Candidate							
+		isPrimary						/ 				
+		setPrimary						/ 如果对于多个中的一个bean，此值为true 匹配候选人，它将成为一个打破平局			
+		getConstructorArgumentValues	/ 获取构造函数参数值									
+		getPropertyValues				/ 属性值获取						
+		isSingleton						/ 是否是单例				
+		isPrototype						/ 是否是多例			
+		isAbstract						/ 是否是抽象类, 标志是否能被实例化				
+		getRole							/ 获取role 		
+		getDescription					/ 获取描述 					
+		getResourceDescription			/ 							
+		getOriginatingBeanDefinition	/ 获取最原始的bean 很多的bean是被 decorated
+
