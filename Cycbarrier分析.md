@@ -4,7 +4,7 @@
 
 --> AQS队列中的节点进入ConditionObject 队列 
 
---> 然后当state == 0 时候就 -> signalAll ->unparkSucessor -> unlock 所有节点从ConditionObject 队列进入到AQS的队列中 结束当前卡口
+--> 然后当state == 0 时候就 -> signalAll ->unparkSuccessor -> unlock 所有节点从ConditionObject 队列进入到AQS的队列中 结束当前卡口
 
 * 重要参数分析
 

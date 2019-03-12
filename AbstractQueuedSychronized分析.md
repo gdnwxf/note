@@ -282,7 +282,7 @@ abstract static class Sync extends AbstractQueuedSynchronizer {
        * Performs lock.  Try immediate barge, backing up to normal
        * acquire on failure.
        */
-     // 非公平锁lock时先直接取设置 state = 1  如果当前是 0 的状态时(其他节点正好入队列) 然后设置排他线程
+     // 非公平锁lock时先直接去设置 state = 1  如果当前是 0 的状态时(其他节点正好入队列) 然后设置排他线程
      // 否则同公平锁
       final void lock() {
           if (compareAndSetState(0, 1))
@@ -301,6 +301,8 @@ abstract static class Sync extends AbstractQueuedSynchronizer {
 #### 公平锁
 
 * 入口lock() 
+
+> 公平锁在判断当前state ==0  的同时还判断是否有后继节点
 
 ```java
 /**

@@ -16,7 +16,7 @@
 	ArrayList  		
 
  	不可变集合  同步集合
-	immutitabl
+	immutitable
 	synchronizedMap / List
 
 	DelayQueue (java.util.concurrent)  	 代理PriorityQueue队列  DelayQueue是一个无界阻塞队列，只有在延迟期满时才能从中提取元素
