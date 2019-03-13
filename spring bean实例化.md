@@ -437,11 +437,13 @@ protected Object initializeBean(final String beanName, final Object bean, RootBe
 
    Object wrappedBean = bean;
   // beanPostProcessorBeforeInitialization 处理
+  // 如CommonAnnotationBeanPostProcessor 处理 @PostConsturct注解
    if (mbd == null || !mbd.isSynthetic()) {
       wrappedBean = applyBeanPostProcessorsBeforeInitialization(wrappedBean, beanName);
    }
 
    try {
+     // 调用 afterPropertiesSet 方法 
       invokeInitMethods(beanName, wrappedBean, mbd);
    }
    catch (Throwable ex) {
