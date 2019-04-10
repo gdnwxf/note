@@ -102,4 +102,4 @@ public class TaskTest
 
 #### 修改前后变化
 
-![image-20190310004938351](/Users/wch/opensource/note/assets/image-20190310004938351.png)
+![image-20190310004938351](https://github.com/gdnwxf/note/blob/master/assets/image-20190310004938351.png)
