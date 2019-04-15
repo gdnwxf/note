@@ -46,6 +46,27 @@ SpringApplication.run(Application.class, args);
 }
 ```
 
+* createApplicationContext
+
+```java
+protected ConfigurableApplicationContext createApplicationContext() {
+    Class<?> contextClass = this.applicationContextClass;
+    if (contextClass == null) {
+        try {
+            contextClass = Class.forName(this.webEnvironment 
+                                         //判断是否是web应用 实例化不同的 ApplicationContext
+                                         ? "org.springframework.boot.context.embedded.AnnotationConfigEmbeddedWebApplicationContext" 
+                                         // AnnotationConfigApplicationContext 
+                                         : "org.springframework.context.annotation.AnnotationConfigApplicationContext");
+        } catch (ClassNotFoundException var3) {
+            throw new IllegalStateException("Unable create a default ApplicationContext, please specify an ApplicationContextClass", var3);
+        }
+    }
+
+    return (ConfigurableApplicationContext)BeanUtils.instantiate(contextClass);
+}
+```
+
 *  prepareContext 方法
 
 ```java
