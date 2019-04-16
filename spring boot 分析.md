@@ -142,7 +142,7 @@ if (isFullConfigurationCandidate(metadata)) {
 
 * 启动类本身会分装到 org.springframework.beans.factory.annotation.AnnotatedGenericBeanDefinition
 
-  ![image-20190314000517945](/Users/wch/opensource/note/assets/image-20190314000517945.png)
+  ![image-20190314000517945](https://github.com/gdnwxf/note/blob/master/assets/image-20190314000517945.png)
 
 * 然后执行.parse(AnnotatedGenericBeanDefinition)的方法
 
