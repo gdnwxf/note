@@ -174,8 +174,8 @@ public static void reLaunch(String[] args, String mainClass, ClassLoader classLo
 
 ```java
 public static void markStartupAndWait() {
-    long t1 = SarLoaderUtils.t1(); //统计开始时间
-    long t2 = System.nanoTime();
+    long t1 = SarLoaderUtils.t1(); //统计开始启动时间
+    long t2 = System.nanoTime(); //统计结束启动时间
     AnsiLog.info("Service(pandora boot) startup in " + (t2 - t1) / 1000000L + " ms");
     Health.markStartup(); // 健康检查
     if ("true".equalsIgnoreCase(System.getProperty("pandora.boot.wait", "true"))) {
