@@ -168,5 +168,27 @@ public static void reLaunch(String[] args, String mainClass, ClassLoader classLo
 }
 ```
 
+ PandoraBootstrap.markStartupAndWait(); 
 
+//标记服务启动完成,并设置线程 wait。防止业务代码运行完毕退出后，导致容器退出。
+
+```java
+public static void markStartupAndWait() {
+    long t1 = SarLoaderUtils.t1(); //统计开始时间
+    long t2 = System.nanoTime();
+    AnsiLog.info("Service(pandora boot) startup in " + (t2 - t1) / 1000000L + " ms");
+    Health.markStartup(); // 健康检查
+    if ("true".equalsIgnoreCase(System.getProperty("pandora.boot.wait", "true"))) {
+        try {
+            Health.markAwait();
+            AnsiLog.info("Service(pandora boot) receive shutdown command, ready to shutdown...");
+        } catch (InterruptedException var5) {
+            throw new RuntimeException(var5);
+        }
+    }
+
+    LogConfigUtil.destoryLoggingSystem();// 销毁日志系统
+    System.exit(0);
+}
+```
 
