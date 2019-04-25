@@ -2,7 +2,7 @@
 
 >  核心jar 文件 taobao-hsf.sar-dev-SNAPSHOT.jar 该jar文件位于 taobao-hsf.sar 中的 root jar文件
 
-![image-20190423111208859](/Users/wch/Library/Application Support/typora-user-images/image-20190423111208859.png)
+![image-20190423111208859](/Users/wch/opensource/note/assets/image-20190423111208859.png)
 
 ##### 关键调用路径
 
