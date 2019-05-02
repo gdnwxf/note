@@ -1,0 +1,57 @@
+@startuml
+
+start
+while (x为非root节点且其颜色为黑色) is (y)
+if (x是左孩子节点) (y)
+    :获取右sib节点;
+    if(sib是黑色) then(y)
+    :设置sib黑色;
+    :设置父节点黑色;
+    :左旋父节点;
+    :sib设置为旋转后x的父节点的右节点;
+    endif
+    if(sib的左孩子为黑色 and sib的右孩子为黑色) then(y)
+        :设置sib为红色;
+        :设置x为x的父节点;
+    else
+        if(如果sib的右节点为黑色) then(y)
+            :设置sib左节点为黑色;
+            :设置sib为红色;
+            :右旋sib;
+            :sib为当旋转后x的父节点的右节点;
+        endif
+        :设置sib为其父节点的颜色;
+        :设置x的父节点为黑色;
+        :设置sib右孩子为黑色;
+        :左旋x的父节点;
+        :x设置成root;
+    endif
+else
+    :获取左sib节点;
+    if(sib为红色) then(y)
+        :设置sib为黑色;
+        :设置x的父节点为红色;
+        :右旋x的父节点;
+        :sib设置为当前x的父节点的左孩子;
+    endif
+    if(sib的左右孩子都为黑色) then(y)
+        :设置sib为黑色;
+        :设置x为x的父节点;
+    else
+        if(sib的做孩子为黑色) then(y)
+            :设置sib的右孩子为黑色;
+            :设置sib为黑色;
+            :左旋sib节点;
+            :设置sib为旋转后的x的父节点的左孩子;
+        endif
+        :设置sib的颜色为x的父节点的颜色;
+        :设置x的父节点为黑色;
+        :设置sib的左孩子为黑色;
+        :右旋x的父节点;
+        :x设置成root;
+    endif
+endif
+end while (n)
+:设置x为黑色;
+stop
+@enduml

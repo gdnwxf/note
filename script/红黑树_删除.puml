@@ -1,0 +1,41 @@
+@startuml
+start
+if(判断[x]节点是否有2个孩子) then(y)
+ :获取节点的右孩子的最左节点;
+ :x.key 设置成最左节点的 key;
+ :x.value 设置成最左节点的 value;
+ :x 设置成最左节点;
+endif
+:依次获取左右节点不为空的replace节点;
+if(replace 不为空) then(y)
+    :将replace的父节点设置成x的父节点;
+    if(x的父节点为空) then(y)
+        :将root设置成replace节点;
+    elseif (x是x父节点的左孩子节点) then(y)
+        :将x父节点的右孩子节点设置成空;
+    else
+        :将x父节点的右孩子节点设置成空;
+    endif
+    :将x的左右孩子和父节点都设置成空;
+    if(x的颜色是黑色) then(y)
+        :红黑树_删除2操作;
+    endif
+elseif ( x的父节点为空 ) then(y)
+   :将root设置成空;
+else
+   if(x节点颜色为黑色) then(y)
+       : 红黑树_删除2操作  ;
+   endif
+   :解除关联;
+   if(x的父节点不为空) then(y)
+        if(x是x的父节点的左孩子) then (y)
+            :将x的父节点的左孩子置空;
+        else if(x是x的父节点的右孩子) then(y)
+            :将x的父节点的左孩子置空;
+        endif
+        :x的parent设置为空;
+        note right : 解除关联
+   endif
+endif
+stop
+@enduml
