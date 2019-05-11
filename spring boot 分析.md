@@ -146,126 +146,129 @@ if (isFullConfigurationCandidate(metadata)) {
 
 * 然后执行.parse(AnnotatedGenericBeanDefinition)的方法
 
-* ```java
-  processConfigurationClass(new ConfigurationClass(metadata, beanName));
-  ```
+```java
+processConfigurationClass(new ConfigurationClass(metadata, beanName));
+```
+
+
 
 * 转成 Source来处理
 
-* ```java
-  SourceClass sourceClass = asSourceClass(configClass);
-  do {
-    //递归处理 里面解析各种注解 ImportResource ComponentScan bean PropertySources 
-    sourceClass = doProcessConfigurationClass(configClass, sourceClass);
-  }
-  while (sourceClass != null);
-  
-  this.configurationClasses.put(configClass, configClass);
-  ```
+```java
+SourceClass sourceClass = asSourceClass(configClass);
+do {
+  //递归处理 里面解析各种注解 ImportResource ComponentScan bean PropertySources 
+  sourceClass = doProcessConfigurationClass(configClass, sourceClass);
+}
+while (sourceClass != null);
+
+this.configurationClasses.put(configClass, configClass);
+```
 
 * 具体如下 至此 springboot 的解析封装基本完成
 
-* ```java
-  /**
-   * Apply processing and build a complete {@link ConfigurationClass} by reading the
-   * annotations, members and methods from the source class. This method can be called
-   * multiple times as relevant sources are discovered.
-   * @param configClass the configuration class being build
-   * @param sourceClass a source class
-   * @return the superclass, or {@code null} if none found or previously processed
-   */
-  protected final SourceClass doProcessConfigurationClass(ConfigurationClass configClass, SourceClass sourceClass) throws IOException {
-     // Recursively process any member (nested) classes first
-     processMemberClasses(configClass, sourceClass);
-  
-     // Process any @PropertySource annotations
-     for (AnnotationAttributes propertySource : AnnotationConfigUtils.attributesForRepeatable(
-           sourceClass.getMetadata(), PropertySources.class, org.springframework.context.annotation.PropertySource.class)) {
-        if (this.environment instanceof ConfigurableEnvironment) {
-           processPropertySource(propertySource);
-        }
-        else {
-           logger.warn("Ignoring @PropertySource annotation on [" + sourceClass.getMetadata().getClassName() +
-                 "]. Reason: Environment must implement ConfigurableEnvironment");
-        }
-     }
-  
-     // Process any @ComponentScan annotations
-     Set<AnnotationAttributes> componentScans = AnnotationConfigUtils.attributesForRepeatable(
-           sourceClass.getMetadata(), ComponentScans.class, ComponentScan.class);
-     if (!componentScans.isEmpty() && !this.conditionEvaluator.shouldSkip(sourceClass.getMetadata(), ConfigurationPhase.REGISTER_BEAN)) {
-        for (AnnotationAttributes componentScan : componentScans) {
-           // The config class is annotated with @ComponentScan -> perform the scan immediately
-           Set<BeanDefinitionHolder> scannedBeanDefinitions =
-                 this.componentScanParser.parse(componentScan, sourceClass.getMetadata().getClassName());
-           // Check the set of scanned definitions for any further config classes and parse recursively if necessary
-           for (BeanDefinitionHolder holder : scannedBeanDefinitions) {
-              if (ConfigurationClassUtils.checkConfigurationClassCandidate(holder.getBeanDefinition(), this.metadataReaderFactory)) {
-                 parse(holder.getBeanDefinition().getBeanClassName(), holder.getBeanName());
-              }
-           }
-        }
-     }
-  
-     // Process any @Import annotations
-     processImports(configClass, sourceClass, getImports(sourceClass), true);
-  
-     // Process any @ImportResource annotations
-     if (sourceClass.getMetadata().isAnnotated(ImportResource.class.getName())) {
-        AnnotationAttributes importResource =
-              AnnotationConfigUtils.attributesFor(sourceClass.getMetadata(), ImportResource.class);
-        String[] resources = importResource.getStringArray("locations");
-        Class<? extends BeanDefinitionReader> readerClass = importResource.getClass("reader");
-        for (String resource : resources) {
-           String resolvedResource = this.environment.resolveRequiredPlaceholders(resource);
-           configClass.addImportedResource(resolvedResource, readerClass);
-        }
-     }
-  
-     // Process individual @Bean methods
-     Set<MethodMetadata> beanMethods = sourceClass.getMetadata().getAnnotatedMethods(Bean.class.getName());
-     for (MethodMetadata methodMetadata : beanMethods) {
-        configClass.addBeanMethod(new BeanMethod(methodMetadata, configClass));
-     }
-  
-     // Process default methods on interfaces
-     processInterfaces(configClass, sourceClass);
-  
-     // Process superclass, if any
-     if (sourceClass.getMetadata().hasSuperClass()) {
-        String superclass = sourceClass.getMetadata().getSuperClassName();
-        if (!superclass.startsWith("java") && !this.knownSuperclasses.containsKey(superclass)) {
-           this.knownSuperclasses.put(superclass, configClass);
-           // Superclass found, return its annotation metadata and recurse
-           return sourceClass.getSuperClass();
-        }
-     }
-  
-     // No superclass -> processing is complete
-     return null;
-  }
-  ```
+```java
+/**
+ * Apply processing and build a complete {@link ConfigurationClass} by reading the
+ * annotations, members and methods from the source class. This method can be called
+ * multiple times as relevant sources are discovered.
+ * @param configClass the configuration class being build
+ * @param sourceClass a source class
+ * @return the superclass, or {@code null} if none found or previously processed
+ */
+protected final SourceClass doProcessConfigurationClass(ConfigurationClass configClass, SourceClass sourceClass) throws IOException {
+   // Recursively process any member (nested) classes first
+   processMemberClasses(configClass, sourceClass);
 
-*  ApplicationContextInitializer 的作用
+   // Process any @PropertySource annotations
+   for (AnnotationAttributes propertySource : AnnotationConfigUtils.attributesForRepeatable(
+         sourceClass.getMetadata(), PropertySources.class, org.springframework.context.annotation.PropertySource.class)) {
+      if (this.environment instanceof ConfigurableEnvironment) {
+         processPropertySource(propertySource);
+      }
+      else {
+         logger.warn("Ignoring @PropertySource annotation on [" + sourceClass.getMetadata().getClassName() +
+               "]. Reason: Environment must implement ConfigurableEnvironment");
+      }
+   }
 
-  ```java
-  // 二维火那边写的ContextInitalizer 就是处理扫描 添加BeanFactoryPostProcessor的处理
-  public class DubboConfigurationApplicationContextInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
-      public DubboConfigurationApplicationContextInitializer() {
+   // Process any @ComponentScan annotations
+   Set<AnnotationAttributes> componentScans = AnnotationConfigUtils.attributesForRepeatable(
+         sourceClass.getMetadata(), ComponentScans.class, ComponentScan.class);
+   if (!componentScans.isEmpty() && !this.conditionEvaluator.shouldSkip(sourceClass.getMetadata(), ConfigurationPhase.REGISTER_BEAN)) {
+      for (AnnotationAttributes componentScan : componentScans) {
+         // The config class is annotated with @ComponentScan -> perform the scan immediately
+         Set<BeanDefinitionHolder> scannedBeanDefinitions =
+               this.componentScanParser.parse(componentScan, sourceClass.getMetadata().getClassName());
+         // Check the set of scanned definitions for any further config classes and parse recursively if necessary
+         for (BeanDefinitionHolder holder : scannedBeanDefinitions) {
+            if (ConfigurationClassUtils.checkConfigurationClassCandidate(holder.getBeanDefinition(), this.metadataReaderFactory)) {
+               parse(holder.getBeanDefinition().getBeanClassName(), holder.getBeanName());
+            }
+         }
       }
-  
-      public void initialize(ConfigurableApplicationContext applicationContext) {
-          Environment env = applicationContext.getEnvironment();
-          String scan = env.getProperty("spring.dubbo.scan");
-          if (scan != null) {
-              AnnotationBean scanner = (AnnotationBean)BeanUtils.instantiate(AnnotationBean.class);
-              scanner.setPackage(scan);
-              scanner.setApplicationContext(applicationContext);
-              applicationContext.addBeanFactoryPostProcessor(scanner);
-              applicationContext.getBeanFactory().addBeanPostProcessor(scanner);
-              applicationContext.getBeanFactory().registerSingleton("annotationBean", scanner);
-          }
-  
+   }
+
+   // Process any @Import annotations
+   processImports(configClass, sourceClass, getImports(sourceClass), true);
+
+   // Process any @ImportResource annotations
+   if (sourceClass.getMetadata().isAnnotated(ImportResource.class.getName())) {
+      AnnotationAttributes importResource =
+            AnnotationConfigUtils.attributesFor(sourceClass.getMetadata(), ImportResource.class);
+      String[] resources = importResource.getStringArray("locations");
+      Class<? extends BeanDefinitionReader> readerClass = importResource.getClass("reader");
+      for (String resource : resources) {
+         String resolvedResource = this.environment.resolveRequiredPlaceholders(resource);
+         configClass.addImportedResource(resolvedResource, readerClass);
       }
-  }
-  ```
+   }
+
+   // Process individual @Bean methods
+   Set<MethodMetadata> beanMethods = sourceClass.getMetadata().getAnnotatedMethods(Bean.class.getName());
+   for (MethodMetadata methodMetadata : beanMethods) {
+      configClass.addBeanMethod(new BeanMethod(methodMetadata, configClass));
+   }
+
+   // Process default methods on interfaces
+   processInterfaces(configClass, sourceClass);
+
+   // Process superclass, if any
+   if (sourceClass.getMetadata().hasSuperClass()) {
+      String superclass = sourceClass.getMetadata().getSuperClassName();
+      if (!superclass.startsWith("java") && !this.knownSuperclasses.containsKey(superclass)) {
+         this.knownSuperclasses.put(superclass, configClass);
+         // Superclass found, return its annotation metadata and recurse
+         return sourceClass.getSuperClass();
+      }
+   }
+
+   // No superclass -> processing is complete
+   return null;
+}
+```
+
+* ApplicationContextInitializer 的作用
+
+```java
+// 二维火那边写的ContextInitalizer 就是处理扫描 添加BeanFactoryPostProcessor的处理
+public class DubboConfigurationApplicationContextInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
+    public DubboConfigurationApplicationContextInitializer() {
+    }
+
+    public void initialize(ConfigurableApplicationContext applicationContext) {
+        Environment env = applicationContext.getEnvironment();
+        String scan = env.getProperty("spring.dubbo.scan");
+        if (scan != null) {
+            AnnotationBean scanner = (AnnotationBean)BeanUtils.instantiate(AnnotationBean.class);
+            scanner.setPackage(scan);
+            scanner.setApplicationContext(applicationContext);
+            applicationContext.addBeanFactoryPostProcessor(scanner);
+            applicationContext.getBeanFactory().addBeanPostProcessor(scanner);
+            applicationContext.getBeanFactory().registerSingleton("annotationBean", scanner);
+        }
+
+    }
+}
+```
+
