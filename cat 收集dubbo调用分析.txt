@@ -7,3 +7,4 @@ cat 收集dubbo调用分析
 				// 重要参数 [ netty 中的ByteBuff]private ByteBuf m_buf; [封装的事件处理器] private Message m_message;
 				--> m_tree = new DefaultMessageTree();  
 				--> m_stack = new Stack<Transaction>();
+
