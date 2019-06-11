@@ -4,10 +4,10 @@ ProtocolConfig : configs  每个协议发布一个服务
 ->com.alibaba.dubbo.rpc.protocol.ProtocolFilterWrapper#export
 ->com.alibaba.dubbo.registry.integration.RegistryProtocol#export
 	->doLocalExport 发布本地服务
-		->com.alibaba.dubbo.rpc.Protocol$Adaptive#export
+		->com.alibaba.dubbo.rpc.Protocol\$Adaptive#export
 			->ServiceClassHolder.getInstance().pushServiceClass(getServiceClass(ref));
 			->protocol.export(proxyFactory.getInvoker(ref, (Class) interfaceClass, local));
-				->com.alibaba.dubbo.rpc.Protocol$Adaptive#export
+				->com.alibaba.dubbo.rpc.Protocol\$Adaptive#export
 					->new ListenerExporterWrapper<T>(protocol.export(invoker),
 						 Collections.unmodifiableList(ExtensionLoader.getExtensionLoader(ExporterListener.class)
                         .getActivateExtension(invoker.getUrl(), Constants.EXPORTER_LISTENER_KEY)));
