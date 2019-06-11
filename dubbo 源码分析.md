@@ -43,9 +43,9 @@ Cluster.join staticDirectory (AvailableCluster  存放一个可以用的invoker 
 > instance = {RegistryProtocol@2093} 
 >  overrideListeners = {ConcurrentHashMap@2169}  size = 0
 >  bounds = {ConcurrentHashMap@2170}  size = 0
->  cluster = {Cluster$Adaptive@2522} 
->  protocol = {Protocol$Adaptive@1998} 
->  registryFactory = {RegistryFactory$Adaptive@2267} 
+>  cluster = {Cluster\$Adaptive@2522} 
+>  protocol = {Protocol​\$Adaptive@1998} 
+>  registryFactory = {RegistryFactory\$Adaptive@2267} 
 >  proxyFactory = {ProxyFactory$Adaptive@2444} 
 
 > 把自己实例化作为构造函数的参数传入到wrapClass 中 并返回 wrapClass 做为instance 
